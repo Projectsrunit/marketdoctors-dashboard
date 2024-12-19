@@ -20,9 +20,9 @@ export default function NotFound() {
           Need help? Contact{" "}
           <a
             href="#"
-            className="text-primary hover:underline"
+            className="text-primary hover:underline my-5"
           >
-            Market Doctor Admin&apos;
+            Market Doctor Admin
           </a>
         </p>
       </div>
