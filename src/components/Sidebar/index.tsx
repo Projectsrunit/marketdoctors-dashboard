@@ -7,7 +7,13 @@ import Image from "next/image";
 import SidebarItem from "@/components/Sidebar/SidebarItem";
 import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { FaTachometerAlt, FaCalendarAlt, FaUser, FaRegFileAlt, FaCog } from 'react-icons/fa';
+import {
+  FaTachometerAlt,
+  FaCalendarAlt,
+  FaUser,
+  FaRegFileAlt,
+  FaCog,
+} from "react-icons/fa";
 import { FaPeopleGroup, FaUserDoctor } from "react-icons/fa6";
 
 interface SidebarProps {
@@ -51,8 +57,8 @@ const menuGroups = [
       },
       {
         icon: <FaUserDoctor />,
-        label: "doctors",
-        route: "/tables",
+        label: "Doctors",
+        route: "/admin/doctor",
       },
       {
         icon: <FaCog />,
