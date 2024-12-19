@@ -34,7 +34,7 @@ const menuGroups = [
       {
         icon: <FaTachometerAlt />,
         label: "Dashboard",
-        route: "/dashboard",
+        route: "/admin",
       },
       // {
       //   icon: <FaUser />,
