@@ -21,7 +21,7 @@ const DoctorTable = () => {
     const fetchDoctors = async () => {
       try {
         const response = await fetch(
-          `https://clownfish-app-i289t.ondigitalocean.app/api/users?populate=*&filters[role][id]=3`,
+          `https://shark-app-vglil.ondigitalocean.app/api/users?populate=*&filters[role][id]=3`,
         );
         if (!response.ok) {
           throw new Error(`Error fetching doctors: ${response.statusText}`);

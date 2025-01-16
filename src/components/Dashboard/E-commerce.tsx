@@ -28,7 +28,7 @@ const ECommerce: React.FC = () => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `https://clownfish-app-i289t.ondigitalocean.app/api/users?populate=*`,
+          `https://shark-app-vglil.ondigitalocean.app/api/users?populate=*`,
         );
         const data = await response.json();
         setUser(data.length);

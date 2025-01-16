@@ -66,7 +66,7 @@ const ChewSettingsPage = () => {
     const fetchChew = async () => {
       try {
         const response = await fetch(
-          `https://clownfish-app-i289t.ondigitalocean.app/api/users/${id}?populate=*&filters[role][id]=4`,
+          `https://shark-app-vglil.ondigitalocean.app/api/users/${id}?populate=*&filters[role][id]=4`,
         );
         if (!response.ok) throw new Error("Network response was not ok");
         const result = await response.json();

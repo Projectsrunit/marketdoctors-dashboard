@@ -21,7 +21,7 @@ const ChewTable = () => {
     const fetchChews = async () => {
       try {
         const response = await fetch(
-          `https://clownfish-app-i289t.ondigitalocean.app/api/users?populate=*&filters[role][id]=4`,
+          `https://shark-app-vglil.ondigitalocean.app/api/users?populate=*&filters[role][id]=4`,
         );
         if (!response.ok) {
           throw new Error(`Error fetching doctors: ${response.statusText}`);
