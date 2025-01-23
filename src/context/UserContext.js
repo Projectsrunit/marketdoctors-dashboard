@@ -57,7 +57,7 @@ export const UserProvider = ({ children }) => {
     setUserRole(1);
     localStorage.removeItem("userId");
     localStorage.removeItem("now");
-    window.location.href = "https://marketdoctors.com.ng/";
+    window.location.href = "/";
   };
 
   return (
