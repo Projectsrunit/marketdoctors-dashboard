@@ -14,6 +14,7 @@ import {
   FaRegFileAlt,
   FaCog,
   FaBook,
+  FaMicrophone,
 } from "react-icons/fa";
 import { FaPeopleGroup, FaUserDoctor } from "react-icons/fa6";
 
@@ -67,11 +68,15 @@ const menuGroups = [
         route: "/admin/articles",
       },
       {
+        icon: <FaMicrophone />,
+        label: "Advertisements",
+        route: "/admin/advertisements",
+      },
+      {
         icon: <FaCog />,
         label: "Settings",
         route: "/admin/settings",
       },
-     
     ],
   },
   // {
