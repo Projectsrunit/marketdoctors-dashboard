@@ -13,6 +13,7 @@ import {
   FaUser,
   FaRegFileAlt,
   FaCog,
+  FaBook,
 } from "react-icons/fa";
 import { FaPeopleGroup, FaUserDoctor } from "react-icons/fa6";
 
@@ -61,10 +62,16 @@ const menuGroups = [
         route: "/admin/doctor",
       },
       {
+        icon: <FaBook />,
+        label: "Articles",
+        route: "/admin/articles",
+      },
+      {
         icon: <FaCog />,
         label: "Settings",
-        route: "/settings",
+        route: "/admin/settings",
       },
+     
     ],
   },
   // {

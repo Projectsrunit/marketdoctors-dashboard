@@ -14,14 +14,14 @@ interface Doctor {
 }
 
 const DoctorTable = () => {
-  const API_BASE_URL = process.env.API_URL || "";
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
   const [doctor, setDoctor] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
         const response = await fetch(
-          `https://shark-app-vglil.ondigitalocean.app/api/users?populate=*&filters[role][id]=3`,
+          `${API_BASE_URL}/api/users?populate=*&filters[role][id]=3`,
         );
         if (!response.ok) {
           throw new Error(`Error fetching doctors: ${response.statusText}`);

@@ -66,7 +66,7 @@ const DoctorSettingsPage = () => {
     const fetchDoctor = async () => {
       try {
         const response = await fetch(
-          `https://shark-app-vglil.ondigitalocean.app/api/users/${id}?populate=*&filters[role][id]=3`,
+          `${API_BASE_URL}/api/users/${id}?populate=*&filters[role][id]=3`,
         );
         if (!response.ok) throw new Error("Network response was not ok");
         const result = await response.json();

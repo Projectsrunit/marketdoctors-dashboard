@@ -14,14 +14,14 @@ interface Chew {
 }
 
 const ChewTable = () => {
-  const API_BASE_URL = process.env.API_URL || "";
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
   const [chew, setChews] = useState<Chew[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   useEffect(() => {
     const fetchChews = async () => {
       try {
         const response = await fetch(
-          `https://shark-app-vglil.ondigitalocean.app/api/users?populate=*&filters[role][id]=4`,
+          `${API_BASE_URL}/api/users?populate=*&filters[role][id]=4`,
         );
         if (!response.ok) {
           throw new Error(`Error fetching doctors: ${response.statusText}`);

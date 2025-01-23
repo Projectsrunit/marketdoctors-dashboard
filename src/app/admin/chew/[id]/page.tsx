@@ -52,12 +52,12 @@ const InputField: React.FC<InputFieldProps> = ({ label, name, value, onChange, i
 );
 
 const ChewSettingsPage = () => {
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
   const { id } = useParams();
   const [chew, setChew] = useState<Chew | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<Chew | null>(null);
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
   useEffect(() => {
     if (!id) return;
@@ -66,7 +66,7 @@ const ChewSettingsPage = () => {
     const fetchChew = async () => {
       try {
         const response = await fetch(
-          `https://shark-app-vglil.ondigitalocean.app/api/users/${id}?populate=*&filters[role][id]=4`,
+          `${API_BASE_URL}/api/users/${id}?populate=*&filters[role][id]=4`,
         );
         if (!response.ok) throw new Error("Network response was not ok");
         const result = await response.json();

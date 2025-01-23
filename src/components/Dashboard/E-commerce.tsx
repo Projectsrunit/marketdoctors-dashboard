@@ -15,14 +15,14 @@ const ECommerce: React.FC = () => {
   const [chewCount, setChewCount] = useState<number>(0);
   const [doctorCount, setDoctorCount] = useState<number>(0);
   const [patientCount, setPatientCount] = useState<number>(0);
-  const API_BASE_URL = process.env.API_URL;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const [user, setUser] = useState<number>(0);
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `https://shark-app-vglil.ondigitalocean.app/api/users?populate=*`,
+          `${API_BASE_URL}/api/users?populate=*`,
         );
         const data = await response.json();
         setUser(data.length);
