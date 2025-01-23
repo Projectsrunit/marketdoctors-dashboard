@@ -94,15 +94,13 @@ const Articles = () => {
         },
         body: JSON.stringify(payload),
       });
-      console.log("Health tip posted:", response);
-      console.log("====================================");
-      console.log(payload);
-      console.log("====================================");
+      setLoading(true);
       handleCloseModal(); // Close the modal after posting
     } catch (error) {
       console.error("Error posting health tip:", error);
     }
   };
+  if (loading) return <Loader />;
 
   return (
     <>
@@ -176,7 +174,7 @@ const Articles = () => {
                   type="submit"
                   className="w-1/4 bg-primary py-3 text-white"
                 >
-                  Submit
+                  {loading ? "loading" : "Post Article"}
                 </button>
               </div>
             </form>
