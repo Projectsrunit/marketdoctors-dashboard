@@ -23,7 +23,8 @@ const ECommerce: React.FC = () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/users?populate=*`);
         const data = await response.json();
-        setUser(data.length);
+        const userTotal = data.length - 1
+        setUser(userTotal);
 
         const chewCount = data.filter((user: any) => user.role.id === 4).length;
         setChewCount(chewCount);
