@@ -2,7 +2,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Loader from "../common/Loader";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
+
 interface Article {
   id: string;
   attributes: {
@@ -21,7 +23,7 @@ const Articles = () => {
     title: "",
     description: "",
     category: "",
-    feature_image: null,
+    feauture_image: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -39,22 +41,31 @@ const Articles = () => {
     fetchArticles();
   }, []);
 
-  const handleArticleClick = (article: any) => {
+  const handleArticleClick = (article: Article) => {
     setSelectedArticle(article);
+    setFormData({
+      title: article.attributes.title,
+      description: article.attributes.description,
+      category: article.attributes.category,
+      feauture_image: article.attributes.feauture_image,
+    });
     setShowModal(true);
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
+    setSelectedArticle(null);
     setFormData({
       title: "",
       description: "",
       category: "",
-      feature_image: null,
+      feauture_image: "",
     });
   };
 
-  const handleInputChange = (e: any) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
       ...prevState,
@@ -62,54 +73,78 @@ const Articles = () => {
     }));
   };
 
-  const handleImageChange = (e: any) => {
-    setFormData((prevState) => ({
-      ...prevState,
-      feature_image: e.target.files[0],
-    }));
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFormData((prevState: any) => ({
+        ...prevState,
+        // @ts-ignore
+        feauture_image: e.target.files[0],
+      }));
+    }
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Form data preparation
     const data = new FormData();
     data.append("title", formData.title);
     data.append("description", formData.description);
     data.append("category", formData.category);
-    if (formData.feature_image) {
-      data.append("feature_image", formData.feature_image);
+    if (formData.feauture_image) {
+      data.append("feauture_image", formData.feauture_image);
     }
-    const payload = {
-      data: {
-        ...formData,
-      },
-    };
-    // Post data to the backend
+
+    setLoading(true);
+
     try {
-      const response = await fetch(`${API_BASE_URL}/api/health-tips`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-      setLoading(true);
-      handleCloseModal(); // Close the modal after posting
+      if (selectedArticle) {
+        // Update article
+        await axios.put(
+          `${API_BASE_URL}/api/health-tips/${selectedArticle.id}`,
+          data,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          },
+        );
+        setArticles((prevArticles) =>
+          prevArticles.map((article) =>
+            article.id === selectedArticle.id
+              ? {
+                  ...article,
+                  attributes: { ...article.attributes, ...formData },
+                }
+              : article,
+          ),
+        );
+      } else {
+        // Create new article
+        const response = await axios.post(
+          `${API_BASE_URL}/api/health-tips`,
+          data,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          },
+        );
+        setArticles((prevArticles) => [...prevArticles, response.data.data]);
+      }
+      handleCloseModal();
     } catch (error) {
-      console.error("Error posting health tip:", error);
+      console.error("Error submitting article:", error);
+    } finally {
+      setLoading(false);
     }
   };
+
   if (loading) return <Loader />;
 
   return (
     <>
-      {/* Modal for submitting health tips */}
+      {/* Modal for creating/editing articles */}
       {showModal && (
         <div className="grid grid-cols-1 gap-9 sm:grid-cols-1">
           <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
             <h3 className="mb-4 text-xl font-medium dark:text-white">
-              Submit Health Tip
+              {selectedArticle ? "Edit Article" : "Submit Health Tip"}
             </h3>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
@@ -174,19 +209,25 @@ const Articles = () => {
                   type="submit"
                   className="w-1/4 bg-primary py-3 text-white"
                 >
-                  {loading ? "loading" : "Post Article"}
+                  {loading
+                    ? "Loading"
+                    : selectedArticle
+                      ? "Update Article"
+                      : "Post Article"}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* Articles list */}
       <div className="grid grid-cols-1 gap-9 sm:grid-cols-1">
         <div className="flex flex-col gap-9">
           <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
             <div className="flex items-center justify-between border-b border-stroke px-5 py-6 dark:border-white">
               <h3 className="text-lg font-semibold text-black dark:text-white">
-                Market Doctor Articles{" "}
+                Market Doctor Articles
               </h3>
               <button
                 onClick={() => setShowModal(!showModal)}
@@ -196,12 +237,9 @@ const Articles = () => {
               </button>
             </div>
             <div className="flex flex-col gap-5.5 p-6.5">
-              {/* Display articles */}
               <div className="space-y-5">
                 {loading ? (
-                  <p>
-                    <Loader />
-                  </p>
+                  <p>Loading .....</p>
                 ) : (
                   articles.map((article) => (
                     <div
@@ -225,6 +263,10 @@ const Articles = () => {
                     </div>
                   ))
                 )}
+              </div>
+
+              <div className="flex justify-center">
+                {articles.length === 0 && <p>No articles found</p>}
               </div>
             </div>
           </div>
