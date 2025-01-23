@@ -1,22 +1,31 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Loader from "../common/Loader";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
+interface Article {
+  id: string;
+  attributes: {
+    title: string;
+    description: string;
+    category: string;
+    feauture_image: string;
+  };
+}
 
 const Articles = () => {
-  const [articles, setArticles] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [selectedArticle, setSelectedArticle] = useState(null);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     category: "",
     feature_image: null,
   });
-  const [loading, setLoading] = useState(true); // Loading state
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Fetch articles from the backend
     const fetchArticles = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/api/health-tips`);
@@ -24,7 +33,7 @@ const Articles = () => {
       } catch (error) {
         console.error("Error fetching articles:", error);
       } finally {
-        setLoading(false); // Stop loading after data is fetched
+        setLoading(false);
       }
     };
     fetchArticles();
@@ -97,7 +106,7 @@ const Articles = () => {
           <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
             <div className="flex items-center justify-between border-b border-stroke px-5 py-6 dark:border-white">
               <h3 className="text-lg font-semibold text-black dark:text-white">
-                Facility Services
+                Market Doctor Articles{" "}
               </h3>
               <button
                 onClick={() => setShowModal(!showModal)}
@@ -110,7 +119,9 @@ const Articles = () => {
               {/* Display articles */}
               <div className="space-y-5">
                 {loading ? (
-                  <p>Loading articles...</p> // Show loading message or spinner
+                  <p>
+                    <Loader />
+                  </p> 
                 ) : (
                   articles.map((article) => (
                     <div
@@ -126,9 +137,9 @@ const Articles = () => {
                         {article.attributes.title}
                       </h3>
                       <p>{article.attributes.description}</p>
-                      <p className="font-bold text-sm dark:text-white">Category: {article.attributes.category}</p>
-
-                      
+                      <p className="text-sm font-bold dark:text-white">
+                        Category: {article.attributes.category}
+                      </p>
                     </div>
                   ))
                 )}
