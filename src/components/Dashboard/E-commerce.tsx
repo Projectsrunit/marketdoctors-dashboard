@@ -21,9 +21,7 @@ const ECommerce: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/api/users?populate=*`,
-        );
+        const response = await fetch(`${API_BASE_URL}/api/users?populate=*`);
         const data = await response.json();
         setUser(data.length);
 
@@ -72,11 +70,12 @@ const ECommerce: React.FC = () => {
         <ChartTwo />
         <ChartThree />
         <MapOne /> */}
-        <div className="col-span-12 xl:col-span-12 py-8">
+        <div className="col-span-12 py-8 xl:col-span-12">
           <ChewTable />
         </div>
-
-        <DoctorTable />
+        <div className="col-span-12 py-8 xl:col-span-12">
+          <DoctorTable />
+        </div>
       </div>
     </>
   );
