@@ -6,15 +6,9 @@ import ChartTwo from "../Charts/ChartTwo";
 import ChatCard from "../Chat/ChatCard";
 import TableOne from "../Tables/TableOne";
 import CardDataStats from "../CardDataStats";
-import { FaUsers, FaUserMd, FaPills, FaUserInjured } from 'react-icons/fa';
-
-const MapOne = dynamic(() => import("@/components/Maps/MapOne"), {
-  ssr: false,
-});
-
-const ChartThree = dynamic(() => import("@/components/Charts/ChartThree"), {
-  ssr: false,
-});
+import { FaUsers, FaUserMd, FaPills, FaUserInjured } from "react-icons/fa";
+import ChewTable from "../Chews";
+import DoctorTable from "../Doctors";
 
 const ECommerce: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -59,45 +53,30 @@ const ECommerce: React.FC = () => {
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
-        <CardDataStats
-          title="Total users"
-          total={String(user)}
-         
-        >
+        <CardDataStats title="Total users" total={String(user)}>
           <FaUsers className="text-primary dark:text-white" size={22} />
         </CardDataStats>
-        <CardDataStats
-          title="Registered Doctors"
-          total={String(doctorCount)}
-         
-        >
+        <CardDataStats title="Registered Doctors" total={String(doctorCount)}>
           <FaUserMd className="text-primary dark:text-white" size={22} />
         </CardDataStats>
-        <CardDataStats
-          title="Total CHEWs"
-          total={String(chewCount)}
-          
-        >
+        <CardDataStats title="Total CHEWs" total={String(chewCount)}>
           <FaPills className="text-primary dark:text-white" size={22} />
         </CardDataStats>
-        <CardDataStats
-          title="Registered Patients"
-          total={String(patientCount)}
-         
-        >
+        <CardDataStats title="Registered Patients" total={String(patientCount)}>
           <FaUserInjured className="text-primary dark:text-white" size={22} />
         </CardDataStats>
       </div>
 
       <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
-        <ChartOne />
+        {/* <ChartOne />
         <ChartTwo />
         <ChartThree />
-        <MapOne />
-        <div className="col-span-12 xl:col-span-8">
-          <TableOne />
+        <MapOne /> */}
+        <div className="col-span-12 xl:col-span-12 py-8">
+          <ChewTable />
         </div>
-        <ChatCard />
+
+        <DoctorTable />
       </div>
     </>
   );

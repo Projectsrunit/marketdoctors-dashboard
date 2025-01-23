@@ -31,7 +31,7 @@ const ChewTable = () => {
         const chewsData: Chew[] = result.map((user: any) => ({
           id: user.id,
           full_name: user.firstName + "\t" + user.lastName,
-          picture_url: user.picture_url || "/images/brand/brand-01.svg",
+          picture_url: user.picture_url || "/images/brand/person_avatar.svg",
           years_of_experience: user.years_of_experience || "0 years",
           specialisation: user.specialisation || "Not Listed",
           confirmed: user.confirmed,
@@ -55,7 +55,7 @@ const ChewTable = () => {
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-        CHEW List{" "}
+        Market Doctor CHEWs
       </h4>
 
       <div className="flex flex-col">

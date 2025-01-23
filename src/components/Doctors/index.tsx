@@ -31,7 +31,7 @@ const DoctorTable = () => {
         const doctorsData: Doctor[] = result.map((user: any) => ({
           id: user.id,
           full_name: user.firstName + "\t" + user.lastName,
-          picture_url: user.picture_url || "/images/brand/brand-01.svg",
+          picture_url: user.picture_url || "/images/brand/person_avatar.svg",
           years_of_experience: user.years_of_experience || "0 years",
           specialisation: user.specialisation || "Not Listed",
           confirmed: user.confirmed,
