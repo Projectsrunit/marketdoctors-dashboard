@@ -80,19 +80,24 @@ const Articles = () => {
     if (formData.feature_image) {
       data.append("feature_image", formData.feature_image);
     }
-
+    const payload = {
+      data: {
+        ...formData,
+      },
+    };
     // Post data to the backend
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/health-tips`,
-        data,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+      const response = await fetch(`${API_BASE_URL}/api/health-tips`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
-      console.log("Health tip posted:", response.data);
+        body: JSON.stringify(payload),
+      });
+      console.log("Health tip posted:", response);
+      console.log("====================================");
+      console.log(payload);
+      console.log("====================================");
       handleCloseModal(); // Close the modal after posting
     } catch (error) {
       console.error("Error posting health tip:", error);
@@ -101,62 +106,16 @@ const Articles = () => {
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-9 sm:grid-cols-1">
-        <div className="flex flex-col gap-9">
-          <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-            <div className="flex items-center justify-between border-b border-stroke px-5 py-6 dark:border-white">
-              <h3 className="text-lg font-semibold text-black dark:text-white">
-                Market Doctor Articles{" "}
-              </h3>
-              <button
-                onClick={() => setShowModal(!showModal)}
-                className="text-primary underline hover:no-underline dark:text-white"
-              >
-                {showModal ? "Cancel" : "Add Article"}
-              </button>
-            </div>
-            <div className="flex flex-col gap-5.5 p-6.5">
-              {/* Display articles */}
-              <div className="space-y-5">
-                {loading ? (
-                  <p>
-                    <Loader />
-                  </p> 
-                ) : (
-                  articles.map((article) => (
-                    <div
-                      key={article.id}
-                      className="cursor-pointer"
-                      onClick={() => handleArticleClick(article)}
-                    >
-                      <img
-                        src={article.attributes.feauture_image}
-                        className="h-40 w-40 rounded border border-stroke object-cover dark:border-strokedark"
-                      />
-                      <h3 className="text-lg font-medium">
-                        {article.attributes.title}
-                      </h3>
-                      <p>{article.attributes.description}</p>
-                      <p className="text-sm font-bold dark:text-white">
-                        Category: {article.attributes.category}
-                      </p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Modal for submitting health tips */}
       {showModal && (
-        <div>
-          <div className="p-6">
-            <h3 className="mb-4 text-xl font-medium">Submit Health Tip</h3>
+        <div className="grid grid-cols-1 gap-9 sm:grid-cols-1">
+          <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+            <h3 className="mb-4 text-xl font-medium dark:text-white">
+              Submit Health Tip
+            </h3>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-black">
+                <label className="block text-sm font-medium text-black dark:text-white">
                   Title
                 </label>
                 <input
@@ -169,7 +128,7 @@ const Articles = () => {
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm font-medium text-black">
+                <label className="block text-sm font-medium text-black dark:text-white">
                   Description
                 </label>
                 <textarea
@@ -182,7 +141,7 @@ const Articles = () => {
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm font-medium text-black">
+                <label className="block text-sm font-medium text-black dark:text-white">
                   Category
                 </label>
                 <input
@@ -195,7 +154,7 @@ const Articles = () => {
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm font-medium text-black">
+                <label className="block text-sm font-medium text-black dark:text-white">
                   Attach Feature Image
                 </label>
                 <input
@@ -224,6 +183,55 @@ const Articles = () => {
           </div>
         </div>
       )}
+      <div className="grid grid-cols-1 gap-9 sm:grid-cols-1">
+        <div className="flex flex-col gap-9">
+          <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+            <div className="flex items-center justify-between border-b border-stroke px-5 py-6 dark:border-white">
+              <h3 className="text-lg font-semibold text-black dark:text-white">
+                Market Doctor Articles{" "}
+              </h3>
+              <button
+                onClick={() => setShowModal(!showModal)}
+                className="text-primary underline hover:no-underline dark:text-white"
+              >
+                {showModal ? "Cancel" : "Add Article"}
+              </button>
+            </div>
+            <div className="flex flex-col gap-5.5 p-6.5">
+              {/* Display articles */}
+              <div className="space-y-5">
+                {loading ? (
+                  <p>
+                    <Loader />
+                  </p>
+                ) : (
+                  articles.map((article) => (
+                    <div
+                      key={article.id}
+                      className="cursor-pointer"
+                      onClick={() => handleArticleClick(article)}
+                    >
+                      <img
+                        src={article.attributes.feauture_image}
+                        className="h-40 w-40 rounded border border-stroke object-cover dark:border-strokedark"
+                      />
+                      <h3 className="text-lg font-medium dark:text-white">
+                        {article.attributes.title}
+                      </h3>
+                      <p className="dark:text-white">
+                        {article.attributes.description}
+                      </p>
+                      <p className="text-sm font-bold dark:text-white">
+                        Category: {article.attributes.category}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   );
 };
