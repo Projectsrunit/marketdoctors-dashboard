@@ -25,9 +25,9 @@ const UserContext = createContext({
 export const UserProvider = ({ children }) => {
   const [id, setId] = useState(null);
   const [userRole, setUserRole] = useState();
-  const searchParams = useSearchParams();
   const pathname = usePathname();
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
 
   function isMoreThan24HoursAgo(epochTime) {
     const secondsIn24Hours = 24 * 60 * 60;
@@ -40,13 +40,13 @@ export const UserProvider = ({ children }) => {
 
     const storageNow = localStorage.getItem("now");
     const storedId = localStorage.getItem("userId");
-    const storedWho = localStorage.getItem("patientLogged") == "true" ?? false;
-    const storedRole = localStorage.getItem("userRole");
 
     if (!isMoreThan24HoursAgo(storageNow) && storedId) {
       setId(storedId);
     }
   }, []);
+
+
 
   const logout = () => {
     setId(null);
