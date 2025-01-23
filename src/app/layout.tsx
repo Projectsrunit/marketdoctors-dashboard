@@ -3,7 +3,7 @@ import "jsvectormap/dist/jsvectormap.css";
 import "flatpickr/dist/flatpickr.min.css";
 import "@/css/satoshi.css";
 import "@/css/style.css";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import Loader from "@/components/common/Loader";
 import { UserProvider } from "../context/UserContext";
 export default function RootLayout({
@@ -23,9 +23,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning={true}>
-        <div className="dark:bg-boxdark-2 dark:text-bodydark">
-          <UserProvider>{loading ? <Loader /> : children}</UserProvider>
-        </div>
+      <Suspense fallback={<div>Loading...</div>}>
+          <UserProvider>
+            {loading ? <Loader /> : children}
+          </UserProvider>
+        </Suspense>
       </body>
     </html>
   );
