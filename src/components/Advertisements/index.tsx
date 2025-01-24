@@ -155,19 +155,7 @@ const Advertisement = () => {
                   required
                 />
               </div>
-              <div className="mb-4">
-                <label className="mb-2 block text-sm font-medium">
-                  Created At
-                </label>
-                <input
-                  type="text"
-                  name="createdAt"
-                  value={formData.createdAt}
-                  onChange={handleInputChange}
-                  className="w-full rounded-lg border p-3"
-                  required
-                />
-              </div>
+
               <div className="mb-4">
                 <label className="mb-2 block text-sm font-medium">
                   Feature Image
@@ -200,10 +188,10 @@ const Advertisement = () => {
 
       <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="mb-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Advertisements</h1>
+          <h1 className="text-xl font-bold dark:text-white">Advertisements</h1>
           <button
             onClick={() => setShowModal(true)}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-white"
+            className="text-primary underline hover:no-underline dark:text-white"
           >
             Add Advertisement
           </button>
@@ -220,10 +208,10 @@ const Advertisement = () => {
                 alt="Advertisement"
                 className="mb-4 h-40 w-full rounded object-cover"
               />
-              <h3 className="text-lg font-semibold">
+              <h3 className="text-lg font-semibold dark:text-white">
                 {article.attributes.text}
               </h3>
-              <p className="text-gray-500 text-sm">
+              <p className="text-gray-500 text-sm dark:text-white">
                 Created At: {article.attributes.createdAt}
               </p>
             </div>

@@ -25,14 +25,20 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body suppressHydrationWarning={true}>
-        <Suspense fallback={<div>Loading...</div>}>
-          <UserProvider>
-            {loading ? <Loader /> : children}
-            <ToastContainer />
-          </UserProvider>
-        </Suspense>
-      </body>
-    </html>
+    <head>
+      <meta charSet="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Market Doctor Dashboard</title>
+      <link rel="icon" href="/favicon.ico" />
+    </head>
+    <body suppressHydrationWarning={true} className="dark:bg-boxdark-2 dark:text-bodydark">
+      <Suspense fallback={<div>Loading...</div>}>
+        <UserProvider>
+          {loading ? <Loader /> : children}
+          <ToastContainer />
+        </UserProvider>
+      </Suspense>
+    </body>
+  </html>
   );
 }
