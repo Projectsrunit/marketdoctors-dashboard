@@ -64,7 +64,7 @@ const SignInPage = () => {
   return (
     <div className="h-screen flex items-center justify-center rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
       <div className="flex flex-wrap items-center">
-        <div className="hidden w-full px-26 py-17.5 text-center  xl:block xl:w-1/2">
+        <div className=" w-full px-26 py-17.5 text-center  xl:block xl:w-1/2">
           <Link
             className="mb-5.5 inline-block"
             href="https://marketdoctors.com.ng/"
