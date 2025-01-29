@@ -12,16 +12,18 @@ interface Doctor {
   full_name: string | null;
   picture_url: string | null;
   specialisation: string[];
-  experience: number;
+  years_of_experience: number;
   confirmed: boolean;
   email: string;
   phone: string;
   gender: string | null;
-  country: string | null;
   home_address: string | null;
   languages: string[];
   date_of_birth: string | null;
+  awards: string[];
+  about: string | null;
   doctorId: number;
+  consultation_fee: string | null;
 }
 
 interface InputFieldProps {
@@ -85,16 +87,18 @@ const DoctorSettingsPage = () => {
         full_name: `${result.firstName} ${result.lastName}`,
         picture_url: result.profile_picture || "/default-avatar.png",
         specialisation: result.specialisation ? [result.specialisation] : [],
-        experience: Number(result.years_of_experience) || 0,
+        awards: result.awards ? result.awards : [],
+        years_of_experience: Number(result.years_of_experience) || 0,
         email: result.email,
         phone: result.phone,
         gender: result.gender || "",
-        country: result.country || "",
         home_address: result.home_address || "",
         languages: result.languages ? result.languages : [],
         date_of_birth: result.dateOfBirth || "",
         confirmed: result.confirmed || false,
+        about: result.about || "",
         doctorId: result.id,
+        consultation_fee: result.consultation_fee || "",
       };
       setDoctor(doctorData);
       setFormData(doctorData);
@@ -119,7 +123,7 @@ const DoctorSettingsPage = () => {
     }
   };
 
- const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData) return;
 
@@ -131,9 +135,12 @@ const DoctorSettingsPage = () => {
         ? formData.specialisation.join(", ")
         : formData.specialisation,
       home_address: formData.home_address,
-      languages:formData.languages,
+      languages: Array.isArray(formData.languages)
+        ? formData.languages.join(", ")
+        : formData.languages,
       date_of_birth: formData.date_of_birth,
       gender: formData.gender,
+      years_of_experience: formData.years_of_experience,
     };
 
     console.log("formDataS", formDataS);
@@ -180,10 +187,13 @@ const DoctorSettingsPage = () => {
                 Phone: "phone",
                 Gender: "gender",
                 Specialisation: "specialisation",
-                Country: "country",
                 Address: "home_address",
                 Languages: "languages",
                 "Date of Birth": "date_of_birth",
+                Awards: "awards",
+                Experience: "years_of_experience",
+                "Consultation Fee": "consultation_fee",
+                "About Doctor": "about",
               }).map(([label, field]) => (
                 <InputField
                   key={field}
@@ -195,6 +205,7 @@ const DoctorSettingsPage = () => {
                 />
               ))}
             </div>
+
             <div className="mt-6 flex justify-between">
               <button
                 type="submit"
