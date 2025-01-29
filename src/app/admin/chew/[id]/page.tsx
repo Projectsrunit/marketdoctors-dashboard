@@ -132,21 +132,19 @@ const ChewSettingsPage = () => {
         ? formData.languages.join(", ")
         : formData.languages,
       date_of_birth: formData.date_of_birth,
+      gender: formData.gender,
     };
 
     console.log("formDataS", formDataS);
 
     try {
-      const response = await fetch(
-        `https://shark-app-vglil.ondigitalocean.app/api/users/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formDataS),
+      const response = await fetch(`${API_BASE_URL}/api/users/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify(formDataS),
+      });
 
       console.log("Request Body:", JSON.stringify(formDataS));
 
