@@ -20,7 +20,7 @@ interface Case {
   symptoms: string[];
   weight: string | null;
   height: string | null;
-  blood_glucose: string | null;
+  blood_glucose: number | null;
   caseId: number;
 }
 
@@ -75,12 +75,14 @@ const ChewSettingsPage = () => {
   }, [id, API_BASE_URL]);
   const fetchChew = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/cases/${id}?populate=*`);
+      const response = await fetch(
+        `${API_BASE_URL}/api/cases/${id}?populate=*`,
+      );
       if (!response.ok) throw new Error("Network response was not ok");
-  
+
       const result = await response.json();
       const caseData = result.data; // Directly access the `data` object
-  
+
       const chewData: Case = {
         id: caseData?.id || 0,
         full_name: `${caseData?.attributes?.first_name} ${caseData?.attributes?.last_name}`,
@@ -97,15 +99,7 @@ const ChewSettingsPage = () => {
         blood_glucose: caseData?.attributes?.blood_glucose || "",
         nearest_bus_stop: caseData?.attributes?.nearest_bus_stop || "",
       };
-  
-      if (caseData?.attributes?.chew?.data) {
-        const chewDetails = caseData.attributes.chew.data.attributes;
-        chewData.chew_username = chewDetails?.username || "";
-        chewData.chew_email = chewDetails?.email || "";
-        chewData.chew_first_name = chewDetails?.firstName || "";
-        chewData.chew_last_name = chewDetails?.lastName || "";
-      }
-  
+
       setChew(chewData);
       setFormData(chewData);
     } catch (error) {
@@ -115,7 +109,6 @@ const ChewSettingsPage = () => {
       setLoading(false);
     }
   };
-  
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -134,21 +127,23 @@ const ChewSettingsPage = () => {
     if (!formData) return;
 
     const formDataS = {
-      full_name: formData.full_name,
-      email: formData.email,
-      phone: formData.phone,
-      current_prescription: Array.isArray(formData.current_prescription)
-        ? formData.current_prescription.join(", ")
-        : formData.current_prescription,
-      home_address: formData.home_address,
-      symptoms: Array.isArray(formData.symptoms)
-        ? formData.symptoms.join(", ")
-        : formData.symptoms,
-      weight: formData.weight,
-      gender: formData.gender,
-      height: formData.height,
-      blood_glucose: formData.blood_glucose,
-      nearest_bus_stop: formData.nearest_bus_stop,
+      data: {
+        full_name: formData.full_name,
+        email: formData.email,
+        phone: formData.phone,
+        current_prescription: Array.isArray(formData.current_prescription)
+          ? formData.current_prescription.join(", ")
+          : formData.current_prescription,
+        home_address: formData.home_address,
+        symptoms: Array.isArray(formData.symptoms)
+          ? formData.symptoms.join(", ")
+          : formData.symptoms,
+        weight: formData.weight,
+        gender: formData.gender,
+        height: formData.height,
+        blood_glucose: formData.blood_glucose,
+        nearest_bus_stop: formData.nearest_bus_stop,
+      },
     };
 
     console.log("formDataS", formDataS);
@@ -181,7 +176,6 @@ const ChewSettingsPage = () => {
 
   if (loading) return <Loader />;
   if (error) return <p>{error}</p>;
-  // if (!chew) return <p>Chew not found</p>;
 
   return (
     <DefaultLayout>
