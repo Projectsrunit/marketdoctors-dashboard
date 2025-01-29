@@ -1,11 +1,11 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import ChewTable from "@/components/Chews";
+import CasesTable from "@/components/Cases";
 
 export const metadata: Metadata = {
-  title: "CHEW | Market Doctors",
-  description: "Market Doctor Registered CHEWs",
+  title: "Cases | Market Doctors",
+  description: "Market Doctor Registered Cases",
 };
 
 const TablesPage = () => {
@@ -14,7 +14,7 @@ const TablesPage = () => {
       <Breadcrumb pageName="Market Doctor CHEWs" />
 
       <div className="flex flex-col gap-10">
-        <ChewTable />
+        <CasesTable />
       </div>
     </DefaultLayout>
   );
