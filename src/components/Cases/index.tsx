@@ -125,6 +125,14 @@ const CasesTable = () => {
             <div className="p-2.5 text-center xl:p-5">
               {caseItem.chews_notes}
             </div>
+            <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
+              <a
+                href={`/admin/cases/${caseItem.id}`}
+                className="text-blue-600 hover:underline dark:text-blue-400"
+              >
+                View Details
+              </a>
+            </div>
           </div>
         ))}
       </div>
