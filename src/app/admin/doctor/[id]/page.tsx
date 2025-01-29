@@ -141,6 +141,8 @@ const DoctorSettingsPage = () => {
       date_of_birth: formData.date_of_birth,
       gender: formData.gender,
       years_of_experience: formData.years_of_experience,
+      about: formData.about,
+      consultation_fee: formData.consultation_fee,
     };
 
     console.log("formDataS", formDataS);
