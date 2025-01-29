@@ -8,9 +8,9 @@ interface Chew {
   id: string;
   full_name: string;
   picture_url: string;
-  specialisation: string;
   years_of_experience: number;
   confirmed: boolean;
+  phone: string;
 }
 
 const ChewTable = () => {
@@ -33,7 +33,7 @@ const ChewTable = () => {
           full_name: user.firstName + "\t" + user.lastName,
           picture_url: user.picture_url || "/images/brand/person_avatar.svg",
           years_of_experience: user.years_of_experience || "0 years",
-          specialisation: user.specialisation || "Not Listed",
+          phone: user.phone || "Not Listed",
           confirmed: user.confirmed,
         }));
 
@@ -48,15 +48,46 @@ const ChewTable = () => {
     fetchChews();
   }, [API_BASE_URL]);
 
+  const exportToCSV = () => {
+    const headers = [
+      "ID,Full Name,Phone,Years of Experience,Confirmed",
+    ];
+    const rows = chew.map((chew) =>
+      [
+        chew.id,
+        `"${chew.full_name}"`,
+        chew.phone,
+        chew.years_of_experience,
+        chew.confirmed ? "Confirmed" : "Pending",
+      ].join(","),
+    );
+    const csv = headers.concat(rows).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "chews.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
   if (loading) {
     return <Loader />;
   }
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-        Market Doctor CHEWs
-      </h4>
+      <div className="mb-6 flex items-center justify-between">
+        <h4 className="text-xl font-semibold text-black dark:text-white">
+          Market Doctor CHEWS
+        </h4>
+        <button
+          onClick={exportToCSV}
+          className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+        >
+          Export CHEW CSV
+        </button>
+      </div>
 
       <div className="flex flex-col">
         <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-5">
@@ -67,7 +98,7 @@ const ChewTable = () => {
           </div>
           <div className="p-2.5 text-center xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Speciality
+              Phone Number
             </h5>
           </div>
           <div className="p-2.5 text-center xl:p-5">
@@ -112,7 +143,7 @@ const ChewTable = () => {
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
               <p className="text-black dark:text-white">
-                {brand.specialisation}
+                {brand.phone}
               </p>
             </div>
 
@@ -122,18 +153,19 @@ const ChewTable = () => {
               </p>
             </div>
 
-           
-            <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5" >
-                <span
-                  className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
-                    brand.confirmed ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
-                  }`}
-                >
-                  {brand.confirmed ? "Confirmed" : "Pending"}
-                </span>
-              </div>
+            <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
+              <span
+                className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
+                  brand.confirmed
+                    ? "bg-green-100 text-green-800"
+                    : "bg-yellow-100 text-yellow-800"
+                }`}
+              >
+                {brand.confirmed ? "Confirmed" : "Pending"}
+              </span>
+            </div>
 
-            <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5" >
+            <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
               <a
                 href={`/admin/chew/${brand.id}`}
                 className="text-blue-600 hover:underline dark:text-blue-400"
