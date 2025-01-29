@@ -9,6 +9,7 @@ import CardDataStats from "../CardDataStats";
 import { FaUsers, FaUserMd, FaPills, FaUserInjured } from "react-icons/fa";
 import ChewTable from "../Chews";
 import DoctorTable from "../Doctors";
+import CasesTable from "../Cases";
 
 const ECommerce: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -23,7 +24,7 @@ const ECommerce: React.FC = () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/users?populate=*`);
         const data = await response.json();
-        const userTotal = data.length - 1
+        const userTotal = data.length - 1;
         setUser(userTotal);
 
         const chewCount = data.filter((user: any) => user.role.id === 4).length;
@@ -76,6 +77,9 @@ const ECommerce: React.FC = () => {
         </div>
         <div className="col-span-12 py-8 xl:col-span-12">
           <DoctorTable />
+        </div>
+        <div className="col-span-12 py-8 xl:col-span-12">
+          <CasesTable />
         </div>
       </div>
     </>
