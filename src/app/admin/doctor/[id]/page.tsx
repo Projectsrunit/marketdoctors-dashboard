@@ -18,7 +18,7 @@ interface Doctor {
   phone: string;
   gender: string | null;
   country: string | null;
-  address: string | null;
+  home_address: string | null;
   languages: string[];
   date_of_birth: string | null;
   doctorId: number;
@@ -28,11 +28,19 @@ interface InputFieldProps {
   label: string;
   name: string;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => void;
   isEditable: boolean;
 }
 
-const InputField: React.FC<InputFieldProps> = ({ label, name, value, onChange, isEditable }) => (
+const InputField: React.FC<InputFieldProps> = ({
+  label,
+  name,
+  value,
+  onChange,
+  isEditable,
+}) => (
   <div>
     <label className="mb-3 block text-sm font-medium text-black dark:text-white">
       {label}
@@ -63,41 +71,40 @@ const DoctorSettingsPage = () => {
     if (!id) return;
     setLoading(true);
 
-    const fetchDoctor = async () => {
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/api/users/${id}?populate=*&filters[role][id]=3`,
-        );
-        if (!response.ok) throw new Error("Network response was not ok");
-        const result = await response.json();
-        const doctorData: Doctor = {
-          id: result.id,
-          full_name: `${result.firstName} ${result.lastName}`,
-          picture_url: result.profile_picture || "/default-avatar.png",
-          specialisation: result.specialisation ? [result.specialisation] : [],
-          experience: Number(result.years_of_experience) || 0,
-          email: result.email,
-          phone: result.phone,
-          gender: result.gender || "",
-          country: result.country || "",
-          address: result.home_address || "",
-          languages: result.languages ? result.languages : [],
-          date_of_birth: result.dateOfBirth || "",
-          confirmed: result.confirmed || false,
-          doctorId: result.id,
-        };
-        setDoctor(doctorData);
-        setFormData(doctorData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Failed to fetch doctor data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDoctor();
   }, [id, API_BASE_URL]);
+  const fetchDoctor = async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/users/${id}?populate=*&filters[role][id]=3`,
+      );
+      if (!response.ok) throw new Error("Network response was not ok");
+      const result = await response.json();
+      const doctorData: Doctor = {
+        id: result.id,
+        full_name: `${result.firstName} ${result.lastName}`,
+        picture_url: result.profile_picture || "/default-avatar.png",
+        specialisation: result.specialisation ? [result.specialisation] : [],
+        experience: Number(result.years_of_experience) || 0,
+        email: result.email,
+        phone: result.phone,
+        gender: result.gender || "",
+        country: result.country || "",
+        home_address: result.home_address || "",
+        languages: result.languages ? result.languages : [],
+        date_of_birth: result.dateOfBirth || "",
+        confirmed: result.confirmed || false,
+        doctorId: result.id,
+      };
+      setDoctor(doctorData);
+      setFormData(doctorData);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setError("Failed to fetch doctor data.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -112,42 +119,50 @@ const DoctorSettingsPage = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+ const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const dataPayload = {data:{formData}}
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/users/${id}?populate=*`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(dataPayload),
-        },
-      );
-      const data = await response.json();
+    if (!formData) return;
 
-      if (response.ok) {
-        toast.success("Profile updated successfully");
-        setFormData(data);
-      } else {
-        Error("Network response was not ok");
+    const formDataS = {
+      full_name: formData.full_name,
+      email: formData.email,
+      phone: formData.phone,
+      specialisation: Array.isArray(formData.specialisation)
+        ? formData.specialisation.join(", ")
+        : formData.specialisation,
+      home_address: formData.home_address,
+      languages:formData.languages,
+      date_of_birth: formData.date_of_birth,
+      gender: formData.gender,
+    };
+
+    console.log("formDataS", formDataS);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/users/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formDataS),
+      });
+
+      console.log("Request Body:", JSON.stringify(formDataS));
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log("Error updating profile:", errorData);
+        setError(errorData.error?.message || "Failed to update profile");
+        return;
       }
 
-     
-      setDoctor((prev) => ({
-        ...prev,
-        ...data,
-      }));
       toast.success("Profile updated successfully");
+      fetchDoctor();
     } catch (error) {
-      console.error("Error updating doctor profile:", error);
-      setError("Failed to update doctor profile");
+      console.error("Error updating profile:", error);
+      setError("Failed to update profile");
     }
   };
-
-
 
   if (loading) return <Loader />;
   if (error) return <p>{error}</p>;
@@ -166,7 +181,7 @@ const DoctorSettingsPage = () => {
                 Gender: "gender",
                 Specialisation: "specialisation",
                 Country: "country",
-                Address: "address",
+                Address: "home_address",
                 Languages: "languages",
                 "Date of Birth": "date_of_birth",
               }).map(([label, field]) => (
@@ -174,16 +189,13 @@ const DoctorSettingsPage = () => {
                   key={field}
                   label={label}
                   name={field}
-                  value={
-                    String(formData?.[field as keyof Doctor] || "")
-                  }
+                  value={String(formData?.[field as keyof Doctor] || "")}
                   onChange={handleChange}
                   isEditable={true}
                 />
               ))}
             </div>
             <div className="mt-6 flex justify-between">
-            
               <button
                 type="submit"
                 className="hover:bg-primarydark focus:bg-primarydark w-1/4 rounded bg-primary py-3 text-white focus-visible:outline-none"

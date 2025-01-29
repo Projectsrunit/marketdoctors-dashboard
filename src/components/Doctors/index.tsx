@@ -48,15 +48,46 @@ const DoctorTable = () => {
     fetchDoctors();
   }, [API_BASE_URL]);
 
+  const exportToCSV = () => {
+    const headers = [
+      "ID,Full Name,Specialisation,Years of Experience,Confirmed",
+    ];
+    const rows = doctor.map((doctor) =>
+      [
+        doctor.id,
+        `"${doctor.full_name}"`,
+        doctor.specialisation,
+        doctor.years_of_experience,
+        doctor.confirmed ? "Confirmed" : "Pending",
+      ].join(","),
+    );
+
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "doctors.csv";
+    a.click();
+  };
+
   if (loading) {
     return <Loader />;
   }
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-        Doctor List{" "}
-      </h4>
+         <div className="mb-6 flex items-center justify-between">
+        <h4 className="text-xl font-semibold text-black dark:text-white">
+         Doctor List
+        </h4>
+        <button
+          onClick={exportToCSV}
+          className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+        >
+          Export Doctor CSV
+        </button>
+      </div>
 
       <div className="flex flex-col">
         <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-5">
@@ -122,18 +153,19 @@ const DoctorTable = () => {
               </p>
             </div>
 
-           
-            <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5" >
-                <span
-                  className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
-                    brand.confirmed ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
-                  }`}
-                >
-                  {brand.confirmed ? "Confirmed" : "Pending"}
-                </span>
-              </div>
+            <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
+              <span
+                className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
+                  brand.confirmed
+                    ? "bg-green-100 text-green-800"
+                    : "bg-yellow-100 text-yellow-800"
+                }`}
+              >
+                {brand.confirmed ? "Confirmed" : "Pending"}
+              </span>
+            </div>
 
-            <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5" >
+            <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
               <a
                 href={`/admin/doctor/${brand.id}`}
                 className="text-blue-600 hover:underline dark:text-blue-400"
