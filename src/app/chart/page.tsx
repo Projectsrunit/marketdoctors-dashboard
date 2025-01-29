@@ -4,7 +4,7 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import React from "react";
 
 export const metadata: Metadata = {
-  title: "Yoklinic",
+  title: "Market Doctor | Chart",
   description: "Telemedicine Marketplace",
   // other metadata
 };

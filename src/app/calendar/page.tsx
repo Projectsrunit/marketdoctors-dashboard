@@ -3,9 +3,8 @@ import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 
 export const metadata: Metadata = {
-  title: "YoKlinic",
-  description:
-    "Telemedicine Marketplace",
+  title: "Market Doctor | Calendar",
+
 };
 
 const CalendarPage = () => {

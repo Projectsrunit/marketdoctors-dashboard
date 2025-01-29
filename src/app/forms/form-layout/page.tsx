@@ -6,8 +6,7 @@ import SelectGroupOne from "@/components/SelectGroup/SelectGroupOne";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Form | Yoklinic",
-  description: "Telemedicine Marketplace",
+  title: "Form | Market Doctorr",
 };
 
 

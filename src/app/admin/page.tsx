@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 
 export const metadata: Metadata = {
-  title: "Yoklinic ",
+  title: "Market Doctor | Dashboard ",
   description: "A telemedicine market place",
 };
 

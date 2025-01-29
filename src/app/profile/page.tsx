@@ -5,8 +5,7 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Profile | Yoklinic",
-  description: "Telemedicine Marketplace",
+  title: "Profile | Market Doctor",
   // other metadata
 };
 

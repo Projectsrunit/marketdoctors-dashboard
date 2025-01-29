@@ -8,8 +8,7 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 
 
 export const metadata: Metadata = {
-  title: "Tables | Yoklinic",
-  description: "Telemedicine Marketplace",
+  title: "Tables | Market Doctor",
 };
 
 
