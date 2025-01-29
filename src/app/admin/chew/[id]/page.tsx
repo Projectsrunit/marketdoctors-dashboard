@@ -17,7 +17,6 @@ interface Chew {
   email: string;
   phone: string;
   gender: string | null;
-  country: string | null;
   address: string | null;
   languages: string[];
   date_of_birth: string | null;
@@ -28,11 +27,19 @@ interface InputFieldProps {
   label: string;
   name: string;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => void;
   isEditable: boolean;
 }
 
-const InputField: React.FC<InputFieldProps> = ({ label, name, value, onChange, isEditable }) => (
+const InputField: React.FC<InputFieldProps> = ({
+  label,
+  name,
+  value,
+  onChange,
+  isEditable,
+}) => (
   <div>
     <label className="mb-3 block text-sm font-medium text-black dark:text-white">
       {label}
@@ -63,95 +70,104 @@ const ChewSettingsPage = () => {
     if (!id) return;
     setLoading(true);
 
-    const fetchChew = async () => {
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/api/users/${id}?populate=*&filters[role][id]=4`,
-        );
-        if (!response.ok) throw new Error("Network response was not ok");
-        const result = await response.json();
-        const chewData: Chew = {
-          id: result.id,
-          full_name: `${result.firstName} ${result.lastName}`,
-          picture_url: result.profile_picture || "/default-avatar.png",
-          specialisation: result.specialisation ? [result.specialisation] : [],
-          experience: Number(result.years_of_experience) || 0,
-          email: result.email,
-          phone: result.phone,
-          gender: result.gender || "",
-          country: result.country || "",
-          address: result.home_address || "",
-          languages: result.languages ? result.languages : [],
-          date_of_birth: result.dateOfBirth || "",
-          confirmed: result.confirmed || false,
-          chewId: result.id,
-        };
-        setChew(chewData);
-        setFormData(chewData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Failed to fetch chew data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchChew();
   }, [id, API_BASE_URL]);
+  const fetchChew = async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/users/${id}?populate=*&filters[role][id]=4`,
+      );
+      if (!response.ok) throw new Error("Network response was not ok");
+      const result = await response.json();
+      const chewData: Chew = {
+        id: result.id,
+        full_name: `${result.firstName} ${result.lastName}`,
+        picture_url: result.profile_picture || "/default-avatar.png",
+        specialisation: result.specialisation ? [result.specialisation] : [],
+        experience: Number(result.years_of_experience) || 0,
+        email: result.email,
+        phone: result.phone,
+        gender: result.gender || "",
+        address: result.home_address || "",
+        languages: result.languages ? result.languages : [],
+        date_of_birth: result.dateOfBirth || "",
+        confirmed: result.confirmed || false,
+        chewId: result.id,
+      };
+      setChew(chewData);
+      setFormData(chewData);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      // setError("Failed to fetch chew data.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     if (formData) {
-      // @ts-ignore
-      const { name, value, type, checked } = e.target;
-      setFormData({
-        ...formData,
+      const { name, value, type, checked } = e.target as HTMLInputElement;
+      setFormData((prev) => ({
+        ...prev!,
         [name]: type === "checkbox" ? checked : value,
-      });
+      }));
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const dataPayload = {data:{formData}}
+    if (!formData) return;
+
+    const formDataS = {
+      full_name: formData.full_name,
+      email: formData.email,
+      phone: formData.phone,
+      specialisation: Array.isArray(formData.specialisation)
+        ? formData.specialisation.join(", ")
+        : formData.specialisation,
+      home_address: formData.address,
+      languages: Array.isArray(formData.languages)
+        ? formData.languages.join(", ")
+        : formData.languages,
+      date_of_birth: formData.date_of_birth,
+    };
+
+    console.log("formDataS", formDataS);
+
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/users/${id}?populate=*`,
+        `https://shark-app-vglil.ondigitalocean.app/api/users/${id}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(dataPayload),
+          body: JSON.stringify(formDataS),
         },
       );
-      const data = await response.json();
 
-      if (response.ok) {
-        toast.success("Profile updated successfully");
-        setFormData(data);
-      } else {
-        Error("Network response was not ok");
+      console.log("Request Body:", JSON.stringify(formDataS));
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log("Error updating profile:", errorData);
+        setError(errorData.error?.message || "Failed to update profile");
+        return;
       }
 
-     
-      setChew((prev) => ({
-        ...prev,
-        ...data,
-      }));
       toast.success("Profile updated successfully");
+      fetchChew();
     } catch (error) {
-      console.error("Error updating chew profile:", error);
-      setError("Failed to update chew profile");
+      console.error("Error updating profile:", error);
+      setError("Failed to update profile");
     }
   };
 
-
-
   if (loading) return <Loader />;
   if (error) return <p>{error}</p>;
-  if (!chew) return <p>Chew not found</p>;
+  // if (!chew) return <p>Chew not found</p>;
 
   return (
     <DefaultLayout>
@@ -165,7 +181,6 @@ const ChewSettingsPage = () => {
                 Phone: "phone",
                 Gender: "gender",
                 Specialisation: "specialisation",
-                Country: "country",
                 Address: "address",
                 Languages: "languages",
                 "Date of Birth": "date_of_birth",
@@ -174,16 +189,13 @@ const ChewSettingsPage = () => {
                   key={field}
                   label={label}
                   name={field}
-                  value={
-                    String(formData?.[field as keyof Chew] || "")
-                  }
+                  value={String(formData?.[field as keyof Chew] || "")}
                   onChange={handleChange}
                   isEditable={true}
                 />
               ))}
             </div>
             <div className="mt-6 flex justify-between">
-            
               <button
                 type="submit"
                 className="hover:bg-primarydark focus:bg-primarydark w-1/4 rounded bg-primary py-3 text-white focus-visible:outline-none"
