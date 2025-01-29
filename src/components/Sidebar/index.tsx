@@ -63,6 +63,11 @@ const menuGroups = [
         route: "/admin/doctor",
       },
       {
+        icon: <FaPeopleGroup />,
+        label: "Patients",
+        route: "/admin/patient",
+      },
+      {
         icon: <FaBook />,
         label: "Articles",
         route: "/admin/articles",
