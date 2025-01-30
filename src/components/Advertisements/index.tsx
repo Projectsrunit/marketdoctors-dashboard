@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Loader from "../common/Loader";
 import { toast } from "react-toastify";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 

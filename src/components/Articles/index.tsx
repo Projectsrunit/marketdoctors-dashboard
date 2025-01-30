@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Loader from "../common/Loader";
+import { toast } from "react-toastify";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -25,17 +26,21 @@ const Articles = () => {
     category: "",
     feauture_image: "",
   });
-  const [loading, setLoading] = useState(false);
+  const [loadingState, setLoadingState] = useState<string | null>(null); // Handles loading state for different processes
+  const [file, setFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchArticles = async () => {
       try {
+        setLoadingState("fetching");
         const response = await axios.get(`${API_BASE_URL}/api/health-tips`);
         setArticles(response.data.data);
       } catch (error) {
         console.error("Error fetching articles:", error);
+        toast.error("Failed to fetch articles.");
       } finally {
-        setLoading(false);
+        setLoadingState(null);
       }
     };
     fetchArticles();
@@ -63,6 +68,47 @@ const Articles = () => {
     });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0] || null;
+    setFile(selectedFile);
+    setFilePreview(selectedFile ? URL.createObjectURL(selectedFile) : null);
+  };
+
+  const handleUpload = async () => {
+    if (!file) {
+      toast.error("Please select a file first.");
+      return;
+    }
+  
+    setLoadingState("uploading");
+    const form = new FormData();
+    form.append("file", file);
+  
+    try {
+      const getUrl = await fetch(`${API_BASE_URL}/api/file-forward/image`, {
+        method: "POST",
+        body: form,
+      });
+  
+      const imageUrl = await getUrl.json();
+      console.log("Upload response:", imageUrl);  // Debugging the response
+  
+      if (!imageUrl?.fileUrl) throw new Error("Invalid upload response");
+  
+      setFormData((prevState) => ({
+        ...prevState,
+        feauture_image: imageUrl.fileUrl,  // Ensure this URL is correct
+      }));
+  
+      toast.success("Image uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error("Failed to upload image.");
+    } finally {
+      setLoadingState(null);
+    }
+  };
+  
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -73,28 +119,27 @@ const Articles = () => {
     }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFormData((prevState: any) => ({
-        ...prevState,
-        // @ts-ignore
-        feauture_image: e.target.files[0],
-      }));
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formData.feauture_image) {
+      toast.error("Please upload an image first.");
+      return;
+    }
     const data = new FormData();
     data.append("title", formData.title);
     data.append("description", formData.description);
     data.append("category", formData.category);
     if (formData.feauture_image) {
-      data.append("feauture_image", formData.feauture_image);
+      data.append("feature_image", formData.feauture_image);
     }
 
-    setLoading(true);
+    setLoadingState("submitting");
+    const payload = {
+      data: {
+        ...formData,
+      },
+    };
 
     try {
       if (selectedArticle) {
@@ -120,22 +165,26 @@ const Articles = () => {
         // Create new article
         const response = await axios.post(
           `${API_BASE_URL}/api/health-tips`,
-          data,
+          payload, // Directly passing payload
           {
-            headers: { "Content-Type": "multipart/form-data" },
+            headers: {
+              "Content-Type": "application/json",
+            },
           },
         );
+
         setArticles((prevArticles) => [...prevArticles, response.data.data]);
       }
       handleCloseModal();
     } catch (error) {
       console.error("Error submitting article:", error);
+      toast.error("Failed to submit article.");
     } finally {
-      setLoading(false);
+      setLoadingState(null);
     }
   };
 
-  if (loading) return <Loader />;
+  if (loadingState === "fetching") return <Loader />;
 
   return (
     <>
@@ -157,6 +206,7 @@ const Articles = () => {
                   value={formData.title}
                   onChange={handleInputChange}
                   className="w-full rounded-lg border-[1.5px] border-stroke p-3"
+                  required
                 />
               </div>
 
@@ -170,6 +220,7 @@ const Articles = () => {
                   onChange={handleInputChange}
                   rows={5}
                   className="w-full rounded-lg border-[1.5px] border-stroke p-3"
+                  required
                 />
               </div>
 
@@ -183,18 +234,40 @@ const Articles = () => {
                   value={formData.category}
                   onChange={handleInputChange}
                   className="w-full rounded-lg border-[1.5px] border-stroke p-3"
+                  required
                 />
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm font-medium text-black dark:text-white">
-                  Attach Feature Image
+                <label className="mb-2 block text-sm font-medium">
+                  Feature Image
                 </label>
+
                 <input
                   type="file"
-                  onChange={handleImageChange}
-                  className="w-full cursor-pointer rounded-lg border-[1.5px] border-stroke p-3"
+                  onChange={handleFileChange}
+                  className="mb-2"
+                  accept="image/*"
+                  required
                 />
+                {filePreview && (
+                  <img
+                    src={filePreview}
+                    alt="Preview"
+                    className="mb-2 h-24 w-24 rounded-md object-cover"
+                  />
+                )}
+
+                <button
+                  type="button"
+                  className="w-full rounded-md bg-primary p-2 text-white"
+                  onClick={handleUpload}
+                  disabled={loadingState === "uploading"}
+                >
+                  {loadingState === "uploading"
+                    ? "Uploading..."
+                    : "Upload Image"}
+                </button>
               </div>
 
               <div className="flex justify-between">
@@ -208,9 +281,10 @@ const Articles = () => {
                 <button
                   type="submit"
                   className="w-1/4 bg-primary py-3 text-white"
+                  disabled={loadingState === "submitting"}
                 >
-                  {loading
-                    ? "Loading"
+                  {loadingState === "submitting"
+                    ? "Submitting..."
                     : selectedArticle
                       ? "Update Article"
                       : "Post Article"}
@@ -238,8 +312,8 @@ const Articles = () => {
             </div>
             <div className="flex flex-col gap-5.5 p-6.5">
               <div className="space-y-5">
-                {loading ? (
-                  <p>Loading .....</p>
+                {loadingState === "fetching" ? (
+                  <p>Loading ...</p>
                 ) : (
                   articles.map((article) => (
                     <div
