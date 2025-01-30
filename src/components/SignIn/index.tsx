@@ -13,7 +13,7 @@ const SignInPage = () => {
   const { setId, setUserRole, userRole } = useUserContext();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [user, setUser] = useState({ identifier: "", password: "" });
+  const [user, setUser] = useState({ email: "", password: "" });
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -26,7 +26,7 @@ const SignInPage = () => {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/auth/local?populate=*`,
+        `${API_BASE_URL}/api/auth/login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -97,8 +97,8 @@ const SignInPage = () => {
                 <FaEnvelope className="text-gray-500 absolute left-3 top-4" />
                 <input
                   type="email"
-                  name="identifier"
-                  value={user.identifier}
+                  name="email"
+                  value={user.email}
                   onChange={handleInputChange}
                   placeholder="Email"
                   className="mb-4 w-full rounded-lg border border-stroke p-3 pl-10 dark:bg-form-input dark:text-white dark:focus:border-primary"
