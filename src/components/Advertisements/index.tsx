@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Loader from "../common/Loader";
+import { toast } from "react-toastify";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -9,7 +11,6 @@ interface Article {
   id: string;
   attributes: {
     text: string;
-    description: string;
     createdAt: string;
     image_url: string;
   };
@@ -21,10 +22,12 @@ const Advertisement = () => {
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [formData, setFormData] = useState({
     text: "",
-    createdAt: "",
     image_url: "",
   });
   const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -41,83 +44,82 @@ const Advertisement = () => {
     fetchArticles();
   }, []);
 
-  const handleArticleClick = (article: Article) => {
-    setSelectedArticle(article);
-    setFormData({
-      text: article.attributes.text,
-      createdAt: article.attributes.createdAt,
-      image_url: article.attributes.image_url,
-    });
-    setShowModal(true);
-  };
-
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedArticle(null);
-    setFormData({
-      text: "",
-      createdAt: "",
-      image_url: "",
-    });
+    setFormData({ text: "", image_url: "" });
+    setFile(null);
+    setFilePreview(null);
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0] || null;
+    setFile(selectedFile);
+    setFilePreview(selectedFile ? URL.createObjectURL(selectedFile) : null);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFormData((prevState: any) => ({
+  const handleUpload = async () => {
+    if (!file) {
+      toast.error("Please select a file first.");
+      return;
+    }
+  
+    setUploading(true);
+    const formm = new FormData();
+    formm.append("file", file);
+  
+    try {
+      const getUrl = await fetch(`${API_BASE_URL}/api/file-forward/image`, {
+        method: "POST",
+        body: formm,
+      });
+  
+      const imageUrl = await getUrl.json();
+      if (!imageUrl?.fileUrl) throw new Error("Invalid upload response");
+  
+      setFormData((prevState) => ({
         ...prevState,
-        // @ts-ignore
-        image_url: e.target.files[0],
+        image_url: imageUrl.fileUrl,
       }));
+  
+      toast.success("Image uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error("Failed to upload image.");
+    } finally {
+      setUploading(false);
     }
   };
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const data = new FormData();
-    data.append("text", formData.text);
-    data.append("createdAt", formData.createdAt);
-    if (formData.image_url) {
-      data.append("feature_image", formData.image_url);
-    }
-
     setLoading(true);
 
+    if (!formData.image_url) {
+      toast.error("Please upload an image first.");
+      setLoading(false);
+      return;
+    }
+
     try {
-      if (selectedArticle) {
-        await axios.put(
-          `${API_BASE_URL}/api/adverts/${selectedArticle.id}`,
-          data,
-          { headers: { "Content-Type": "multipart/form-data" } },
-        );
-        setArticles((prevArticles) =>
-          prevArticles.map((article) =>
-            article.id === selectedArticle.id
-              ? {
-                  ...article,
-                  attributes: { ...article.attributes, ...formData },
-                }
-              : article,
-          ),
-        );
-      } else {
-        const response = await axios.post(`${API_BASE_URL}/api/adverts`, data, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        setArticles((prevArticles) => [...prevArticles, response.data.data]);
-      }
+      const payload = {
+        data: { text: formData.text, image_url: formData.image_url },
+      };
+
+      const response = await fetch(`${API_BASE_URL}/api/adverts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error("Failed to submit advertisement");
+
+      toast.success("Advertisement submitted successfully!");
       handleCloseModal();
     } catch (error) {
-      console.error("Error submitting article:", error);
+      console.error("Error submitting advertisement:", error);
+      toast.error("Failed to submit advertisement.");
     } finally {
       setLoading(false);
     }
@@ -130,12 +132,10 @@ const Advertisement = () => {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="relative rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-            {/* Close Button */}
             <button
               type="button"
               onClick={handleCloseModal}
-              className="bg-gray-200 text-gray-600 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 absolute right-3 top-3 rounded-full p-2"
-              aria-label="Close modal"
+              className="bg-gray-200 hover:bg-gray-300 absolute right-3 top-3 rounded-full p-2"
             >
               ✕
             </button>
@@ -143,6 +143,7 @@ const Advertisement = () => {
             <h3 className="mb-4 text-xl font-semibold">
               {selectedArticle ? "Edit Advertisement" : "Create Advertisement"}
             </h3>
+
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label className="mb-2 block text-sm font-medium">Title</label>
@@ -150,7 +151,9 @@ const Advertisement = () => {
                   type="text"
                   name="text"
                   value={formData.text}
-                  onChange={handleInputChange}
+                  onChange={(e) =>
+                    setFormData({ ...formData, text: e.target.value })
+                  }
                   className="w-full rounded-lg border p-3"
                   required
                 />
@@ -160,12 +163,29 @@ const Advertisement = () => {
                 <label className="mb-2 block text-sm font-medium">
                   Feature Image
                 </label>
+
                 <input
                   type="file"
-                  onChange={handleImageChange}
-                  className="w-full cursor-pointer rounded-lg border p-3"
+                  onChange={handleFileChange}
+                  className="mb-2"
                 />
+                {filePreview && (
+                  <img
+                    src={filePreview}
+                    alt="Preview"
+                    className="mb-2 h-24 w-24 rounded-md object-cover"
+                  />
+                )}
+
+                <button
+                  type="button"
+                  className="w-full rounded-md bg-primary p-2 text-white"
+                  onClick={handleUpload}
+                  disabled={uploading}
+                >
+                </button>
               </div>
+
               <div className="flex justify-between">
                 <button
                   type="button"
@@ -174,11 +194,12 @@ const Advertisement = () => {
                 >
                   Cancel
                 </button>
+
                 <button
                   type="submit"
                   className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
                 >
-                  {selectedArticle ? "Update" : "Create"}
+                  {selectedArticle ? "Update" : "Create Advertisement"}
                 </button>
               </div>
             </form>
@@ -196,12 +217,13 @@ const Advertisement = () => {
             Add Advertisement
           </button>
         </div>
+
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {articles.map((article) => (
             <div
               key={article.id}
               className="cursor-pointer rounded-lg border p-4 shadow-md hover:shadow-lg"
-              onClick={() => handleArticleClick(article)}
+              onClick={() => setSelectedArticle(article)}
             >
               <img
                 src={article.attributes.image_url}
@@ -217,9 +239,6 @@ const Advertisement = () => {
             </div>
           ))}
         </div>
-        {articles.length === 0 && (
-          <p className="text-gray-500 text-center">No advertisements found.</p>
-        )}
       </div>
     </>
   );
