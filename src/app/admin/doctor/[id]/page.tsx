@@ -6,7 +6,7 @@ import Loader from "../../../../components/common/Loader";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { toast } from "react-toastify";
-
+import StatusToggle from "../../../../components/StatusToggle/StatusToggle";
 interface Doctor {
   id: number;
   full_name: string | null;
@@ -25,6 +25,7 @@ interface Doctor {
   doctorId: number;
   consultation_fee: string | null;
   facility: string | null;
+  certify_url: string | null;
 }
 
 interface InputFieldProps {
@@ -96,11 +97,12 @@ const DoctorSettingsPage = () => {
         home_address: result.home_address || "",
         languages: result.languages ? result.languages : [],
         dateOfBirth: result.dateOfBirth || "",
-        confirmed: result.confirmed || false,
+        confirmed: result.confirmed,
         about: result.about || "",
         doctorId: result.id,
         facility: result.facility,
         consultation_fee: result.consultation_fee || "",
+        certify_url: result.certify_url,
       };
       setDoctor(doctorData);
       setFormData(doctorData);
@@ -147,6 +149,7 @@ const DoctorSettingsPage = () => {
       consultation_fee: formData.consultation_fee,
       facility: formData.facility,
       awards: formData.awards,
+      confirmed: formData.confirmed,
     };
 
     console.log("formDataS", formDataS);
@@ -176,7 +179,9 @@ const DoctorSettingsPage = () => {
       setError("Failed to update profile");
     }
   };
-
+  const handleStatusChange = (newStatus: boolean) => {
+    setFormData((prev) => (prev ? { ...prev, confirmed: newStatus } : null));
+  };
   if (loading) return <Loader />;
   if (error) return <p>{error}</p>;
   if (!doctor) return <p>Doctor not found</p>;
@@ -268,7 +273,17 @@ const DoctorSettingsPage = () => {
               ))}
             </div>
 
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex justify-between">
+              <div className="flex items-center">
+                <label className="mr-2 text-sm font-medium text-black dark:text-white">
+                  Confirm Doctor
+                </label>
+                <StatusToggle
+                  enabled={formData?.confirmed}
+                  setEnabled={handleStatusChange}
+                />
+              </div>
+
               <button
                 type="submit"
                 className="hover:bg-primarydark focus:bg-primarydark w-1/4 rounded bg-primary py-3 text-white focus-visible:outline-none"
