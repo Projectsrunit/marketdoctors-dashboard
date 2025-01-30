@@ -6,6 +6,7 @@ import Loader from "../../../../components/common/Loader";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { toast } from "react-toastify";
+import StatusToggle from "../../../../components/StatusToggle/StatusToggle";
 
 interface Chew {
   id: number;
@@ -133,6 +134,7 @@ const ChewSettingsPage = () => {
         : formData.languages,
       date_of_birth: formData.date_of_birth,
       gender: formData.gender,
+      confirmed: formData.confirmed,
     };
 
     console.log("formDataS", formDataS);
@@ -163,6 +165,10 @@ const ChewSettingsPage = () => {
     }
   };
 
+  const handleStatusChange = (newStatus: boolean) => {
+    setFormData((prev) => (prev ? { ...prev, confirmed: newStatus } : null));
+  };
+
   if (loading) return <Loader />;
   if (error) return <p>{error}</p>;
   // if (!chew) return <p>Chew not found</p>;
@@ -178,7 +184,6 @@ const ChewSettingsPage = () => {
                 Email: "email",
                 Phone: "phone",
                 Gender: "gender",
-                Specialisation: "specialisation",
                 Address: "address",
                 Languages: "languages",
                 "Date of Birth": "date_of_birth",
@@ -194,11 +199,21 @@ const ChewSettingsPage = () => {
               ))}
             </div>
             <div className="mt-6 flex justify-between">
+              <div className="flex items-center">
+                <label className="mr-2 text-sm font-medium text-black dark:text-white">
+                  Confirm Doctor
+                </label>
+                <StatusToggle
+                  enabled={formData?.confirmed}
+                  setEnabled={handleStatusChange}
+                />
+              </div>
+
               <button
                 type="submit"
                 className="hover:bg-primarydark focus:bg-primarydark w-1/4 rounded bg-primary py-3 text-white focus-visible:outline-none"
               >
-                Update Profile
+                {loading ? "Updating..." : "Update Profile"}
               </button>
             </div>
           </div>
