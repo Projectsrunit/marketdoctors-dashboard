@@ -30,19 +30,20 @@ const Advertisement = () => {
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`${API_BASE_URL}/api/adverts`);
-        setArticles(response.data.data);
-      } catch (error) {
-        console.error("Error fetching articles:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchArticles();
   }, []);
+
+  const fetchArticles = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API_BASE_URL}/api/adverts`);
+      setArticles(response.data.data);
+    } catch (error) {
+      console.error("Error fetching articles:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -63,25 +64,25 @@ const Advertisement = () => {
       toast.error("Please select a file first.");
       return;
     }
-  
+
     setUploading(true);
     const formm = new FormData();
     formm.append("file", file);
-  
+
     try {
       const getUrl = await fetch(`${API_BASE_URL}/api/file-forward/image`, {
         method: "POST",
         body: formm,
       });
-  
+
       const imageUrl = await getUrl.json();
       if (!imageUrl?.fileUrl) throw new Error("Invalid upload response");
-  
+
       setFormData((prevState) => ({
         ...prevState,
         image_url: imageUrl.fileUrl,
       }));
-  
+
       toast.success("Image uploaded successfully!");
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -90,7 +91,6 @@ const Advertisement = () => {
       setUploading(false);
     }
   };
-  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,6 +117,7 @@ const Advertisement = () => {
 
       toast.success("Advertisement submitted successfully!");
       handleCloseModal();
+      fetchArticles();
     } catch (error) {
       console.error("Error submitting advertisement:", error);
       toast.error("Failed to submit advertisement.");
@@ -183,6 +184,8 @@ const Advertisement = () => {
                   onClick={handleUpload}
                   disabled={uploading}
                 >
+                  Upload Image
+                  {/* {uploading ? "Uploading..." : "Upload Image"} */}
                 </button>
               </div>
 
