@@ -26,6 +26,7 @@ interface Doctor {
   consultation_fee: string | null;
   facility: string | null;
   certify_url: string | null;
+  qualifications: string[];
 }
 
 interface InputFieldProps {
@@ -70,6 +71,8 @@ const DoctorSettingsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<Doctor | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -103,12 +106,92 @@ const DoctorSettingsPage = () => {
         facility: result.facility,
         consultation_fee: result.consultation_fee || "",
         certify_url: result.certify_url,
+        qualifications: result.qualifications
+          ? result.qualifications.map((qual: any) => qual.file_url)
+          : [],
       };
       setDoctor(doctorData);
       setFormData(doctorData);
     } catch (error) {
       console.error("Error fetching data:", error);
       setError("Failed to fetch doctor data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0] || null;
+    setFile(selectedFile);
+    setFilePreview(selectedFile ? URL.createObjectURL(selectedFile) : null);
+  };
+
+  const handleUpload = async () => {
+    if (!file) {
+      toast.error("Please select a file first.");
+      return;
+    }
+
+    const saveQualification = async (fileUrl: string) => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/qualifications`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            data: {
+              name: file?.name,
+              file_url: fileUrl,
+              user: id,
+            },
+          }),
+        });
+
+        if (!response.ok) throw new Error("Failed to save qualification");
+
+        toast.success("Qualification document uploaded successfully!");
+        fetchDoctor(); // Refresh doctor details
+      } catch (error) {
+        console.error("Error saving qualification:", error);
+        toast.error("Failed to save document.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    setLoading(true);
+    const form = new FormData();
+    form.append("file", file);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/file-forward`, {
+        method: "POST",
+        body: form,
+      });
+
+      const textResponse = await response.text(); // Inspect response as raw text
+      console.log("Raw upload response:", textResponse);
+
+      const imageUrl = JSON.parse(textResponse); // Parse manually to catch errors
+      console.log("Parsed upload response:", imageUrl);
+
+      if (!imageUrl?.fileUrl) throw new Error("Invalid upload response");
+      setFormData((prevState: any) => ({
+        ...prevState,
+        qualifications: [
+          ...(Array.isArray(prevState?.qualifications)
+            ? prevState.qualifications
+            : []),
+          imageUrl.fileUrl,
+        ],
+      }));
+      await saveQualification(imageUrl.fileUrl);
+
+      toast.success("Image uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error("Failed to upload image.");
     } finally {
       setLoading(false);
     }
@@ -208,7 +291,7 @@ const DoctorSettingsPage = () => {
                 Awards: "awards",
 
                 "Doctor Fee": "consultation_fee",
-                "Certifying Documents": "certify_url",
+                "Certifying Documents": "qualifications",
               }).map(([label, field]) => (
                 <div key={field} className="flex flex-col gap-2">
                   <label className="text-sm font-medium text-black dark:text-white">
@@ -231,23 +314,70 @@ const DoctorSettingsPage = () => {
                       )}
                     </div>
                   ) : /* Certifying Documents Handling */
-                  field === "certify_url" ? (
+                  field === "qualifications" ? (
                     // @ts-ignore
                     formData?.[field] ? (
-                      <p className="font-medium text-primary underline">
-                        <a
-                          // @ts-ignore
-                          href={formData[field]}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          View Certifying Documents
-                        </a>
-                      </p>
+                      <div>
+                        <ul>
+                          {formData.qualifications.map((url, index) => (
+                            <li key={index}>
+                              <a
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary underline"
+                              >
+                                View Doctor Document {index + 1}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+
+                        <div>
+                          <input
+                            type="file"
+                            accept=".pdf,.doc,.docx,.jpg,.png"
+                            onChange={handleFileChange}
+                            className="border-gray-300 mt-2 block w-full rounded-md border shadow-sm"
+                          />
+                          {filePreview && (
+                            <p className="text-gray-500 mt-2 text-sm">
+                              Selected File: {file?.name}
+                            </p>
+                          )}
+                          <button
+                            type="button"
+                            onClick={handleUpload}
+                            className="mt-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                          >
+                            Upload Certifying Documents
+                          </button>
+                        </div>
+                      </div>
                     ) : (
-                      <p className="text-red">
-                        This user has no certifying documents.
-                      </p>
+                      <div>
+                        <label className="text-sm font-medium text-red dark:text-white">
+                          Upload Qualification Documents
+                        </label>
+                        <input
+                          type="file"
+                          accept=".pdf,.doc,.docx,.jpg,.png"
+                          onChange={handleFileChange}
+                          className="border-gray-300 mt-2 block w-full rounded-md border shadow-sm"
+                        />
+                        {filePreview && (
+                          <p className="text-gray-500 mt-2 text-sm">
+                            Selected File: {file?.name}
+                          </p>
+                        )}
+                        <button
+                          type="button"
+                          onClick={handleUpload}
+                          className="mt-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                        >
+                          Upload
+                        </button>
+                      </div>
                     )
                   ) : /* Background (Text Area) Handling */
                   field === "about" || field == "awards" ? (
