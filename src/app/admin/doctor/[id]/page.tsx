@@ -289,7 +289,7 @@ const DoctorSettingsPage = () => {
                 "Facility Name": "facility",
                 Background: "about",
                 Awards: "awards",
-
+                Experience: "years_of_experience",
                 "Doctor Fee": "consultation_fee",
                 "Certifying Documents": "qualifications",
               }).map(([label, field]) => (
