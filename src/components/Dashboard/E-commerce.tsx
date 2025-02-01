@@ -17,43 +17,56 @@ const ECommerce: React.FC = () => {
   const [doctorCount, setDoctorCount] = useState<number>(0);
   const [patientCount, setPatientCount] = useState<number>(0);
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
+  const [casesCount, setCasesCount] = useState<number>(0);
   const [user, setUser] = useState<number>(0);
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/users?populate=*`);
-        const data = await response.json();
-        const userTotal = data.length - 1;
-        setUser(userTotal);
-
-        const chewCount = data.filter((user: any) => user.role.id === 4).length;
-        setChewCount(chewCount);
-
-        const patientCount = data.filter(
-          (user: any) => user.role.id === 5,
-        ).length;
-        setPatientCount(patientCount);
-
-        const doctorCount = data.filter(
-          (user: any) => user.role.id === 3,
-        ).length;
-        setDoctorCount(doctorCount);
-
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      }
-    };
-
     fetchData();
-  }, []);
+    fetchCases();
+  }, [API_BASE_URL]);
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/users?populate=*`);
+      const data = await response.json();
+      const userTotal = data.length - 1;
+      setUser(userTotal);
+
+      const chewCount = data.filter((user: any) => user.role.id === 4).length;
+      setChewCount(chewCount);
+
+      const patientCount = data.filter(
+        (user: any) => user.role.id === 5,
+      ).length;
+      setPatientCount(patientCount);
+
+      const doctorCount = data.filter((user: any) => user.role.id === 3).length;
+      setDoctorCount(doctorCount);
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setLoading(false);
+    }
+  };
+
+  const fetchCases = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/cases`);
+      const data = await response.json();
+
+      const casesTotal = data.meta?.pagination?.total || 0;
+      setCasesCount(casesTotal);
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching cases:", error);
+      setLoading(false);
+    }
+  };
 
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
-        <CardDataStats title="Total users" total={String(user)}>
+        <CardDataStats title="Total Number Of Cases" total={String(casesCount)}>
           <FaUsers className="text-primary dark:text-white" size={22} />
         </CardDataStats>
         <CardDataStats title="Registered Doctors" total={String(doctorCount)}>
