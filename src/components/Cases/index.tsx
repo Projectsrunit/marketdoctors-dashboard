@@ -58,15 +58,9 @@ const CasesTable = () => {
   }, [API_BASE_URL]);
 
   const exportToCSV = () => {
-    const headers = ["ID,Full Name,Symptoms,Number Of Case Visits"];
+    const headers = ["ID,Chew Name,Patient Name,PatientPhone Number"];
     const rows = chew.map((chew) =>
-      [
-        chew.id,
-        `"${chew.full_name}"`,
-        chew.symptoms.join(", "),
-        chew.chews_notes,
-        caseCounts,
-      ].join(","),
+      [chew.id, chew.chew_name, `"${chew.full_name}"`, chew.phone].join(","),
     );
     const csv = headers.concat(rows).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
