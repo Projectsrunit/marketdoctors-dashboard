@@ -46,7 +46,6 @@ const CasesTable = () => {
           counts[chew.chew_name] = (counts[chew.chew_name] || 0) + 1;
         });
 
-
         setCaseCounts(counts);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -59,13 +58,14 @@ const CasesTable = () => {
   }, [API_BASE_URL]);
 
   const exportToCSV = () => {
-    const headers = ["ID,Full Name,Symptoms,Chew Notes, Symptoms"];
+    const headers = ["ID,Full Name,Symptoms,Number Of Case Visits"];
     const rows = chew.map((chew) =>
       [
         chew.id,
         `"${chew.full_name}"`,
         chew.symptoms.join(", "),
         chew.chews_notes,
+        caseCounts,
       ].join(","),
     );
     const csv = headers.concat(rows).join("\n");
@@ -135,8 +135,9 @@ const CasesTable = () => {
             <div className="p-2.5 text-center dark:text-white xl:p-5">
               {caseItem.phone}
             </div>
-            <div className="p-2.5 text-center xl:p-5 dark:text-white">{caseCounts[caseItem.chew_name] || 0}</div>
-
+            <div className="p-2.5 text-center dark:text-white xl:p-5">
+              {caseCounts[caseItem.chew_name] || 0}
+            </div>
             <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
               <a
                 href={`/admin/cases/${caseItem.id}`}
