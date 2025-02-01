@@ -18,6 +18,7 @@ const CasesTable = () => {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
   const [chew, setChews] = useState<Chew[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [caseCounts, setCaseCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const fetchChews = async () => {
@@ -40,6 +41,13 @@ const CasesTable = () => {
         }));
 
         setChews(chewsData);
+        const counts: Record<string, number> = {};
+        chewsData.forEach((chew) => {
+          counts[chew.chew_name] = (counts[chew.chew_name] || 0) + 1;
+        });
+
+
+        setCaseCounts(counts);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -92,25 +100,24 @@ const CasesTable = () => {
       <div className="flex flex-col">
         <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-5">
           <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
+            <h5 className="text-sm font-medium uppercase dark:text-white xsm:text-base">
               Chew Name
             </h5>{" "}
             {/* Added new column */}
           </div>
           <div className="p-2.5 xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-            Patient  Name
+            <h5 className="text-sm font-medium uppercase dark:text-white xsm:text-base">
+              Patient Name
             </h5>
           </div>
           <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
+            <h5 className="text-sm font-medium uppercase dark:text-white xsm:text-base">
               Phone Number
             </h5>
           </div>
-
           <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Chew Notes
+            <h5 className="text-sm font-medium uppercase dark:text-white xsm:text-base">
+              Number of Case Visits{" "}
             </h5>
           </div>
         </div>
@@ -119,12 +126,17 @@ const CasesTable = () => {
             key={caseItem.id}
             className="grid grid-cols-3 gap-4 sm:grid-cols-5"
           >
-            <div className="p-2.5 text-center xl:p-5">{caseItem.chew_name}</div>{" "}
-            <div className="p-2.5 xl:p-5">{caseItem.full_name}</div>
-            <div className="p-2.5 text-center xl:p-5">{caseItem.phone}</div>
-            <div className="p-2.5 text-center xl:p-5">
-              {caseItem.chews_notes}
+            <div className="p-2.5 text-center dark:text-white xl:p-5">
+              {caseItem.chew_name}
+            </div>{" "}
+            <div className="p-2.5 dark:text-white xl:p-5">
+              {caseItem.full_name}
             </div>
+            <div className="p-2.5 text-center dark:text-white xl:p-5">
+              {caseItem.phone}
+            </div>
+            <div className="p-2.5 text-center xl:p-5 dark:text-white">{caseCounts[caseItem.chew_name] || 0}</div>
+
             <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
               <a
                 href={`/admin/cases/${caseItem.id}`}

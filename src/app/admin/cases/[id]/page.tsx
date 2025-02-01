@@ -10,18 +10,12 @@ import { toast } from "react-toastify";
 interface Case {
   id: number;
   full_name: string | null;
-  current_prescription: string[];
   email: string;
   phone: string;
-  chews_notes: string[];
   gender: string | null;
-  home_address: string | null;
-  nearest_bus_stop: string | null;
-  symptoms: string[];
-  weight: string | null;
-  height: string | null;
-  blood_glucose: number | null;
+
   caseId: number;
+  age: number;
 }
 
 interface InputFieldProps {
@@ -66,6 +60,7 @@ const ChewSettingsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<Case | null>(null);
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
+  const [caseVisits, setCaseVisits] = useState<any[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -81,30 +76,27 @@ const ChewSettingsPage = () => {
       if (!response.ok) throw new Error("Network response was not ok");
 
       const result = await response.json();
-      const caseData = result.data; // Directly access the `data` object
+      const caseData = result.data;
 
       const chewData: Case = {
         id: caseData?.id || 0,
         full_name: `${caseData?.attributes?.first_name} ${caseData?.attributes?.last_name}`,
         email: caseData?.attributes?.email || "",
-        phone: caseData?.attributes?.phone_number || "", // Optional chaining
+        phone: caseData?.attributes?.phone_number || "",
         gender: caseData?.attributes?.gender || "",
-        home_address: caseData?.attributes?.home_address || "",
         caseId: caseData?.id || 0,
-        current_prescription: caseData?.attributes?.current_prescription || [],
-        chews_notes: caseData?.attributes?.chews_notes || [],
-        symptoms: caseData?.attributes?.symptoms || [],
-        weight: caseData?.attributes?.weight || "",
-        height: caseData?.attributes?.height || "",
-        blood_glucose: caseData?.attributes?.blood_glucose || "",
-        nearest_bus_stop: caseData?.attributes?.nearest_bus_stop || "",
+        age: caseData?.attributes?.age || 0,
       };
 
       setChew(chewData);
       setFormData(chewData);
+
+      // Extract case visits
+      if (caseData?.attributes?.casevisits?.data) {
+        setCaseVisits(caseData.attributes.casevisits.data);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
-      // setError("Failed to fetch chew data.");
     } finally {
       setLoading(false);
     }
@@ -128,21 +120,10 @@ const ChewSettingsPage = () => {
 
     const formDataS = {
       data: {
-        full_name: formData.full_name,
+        first_name: formData.full_name,
         email: formData.email,
-        phone: formData.phone,
-        current_prescription: Array.isArray(formData.current_prescription)
-          ? formData.current_prescription.join(", ")
-          : formData.current_prescription,
-        home_address: formData.home_address,
-        symptoms: Array.isArray(formData.symptoms)
-          ? formData.symptoms.join(", ")
-          : formData.symptoms,
-        weight: formData.weight,
-        gender: formData.gender,
-        height: formData.height,
-        blood_glucose: formData.blood_glucose,
-        nearest_bus_stop: formData.nearest_bus_stop,
+        phone_number: formData.phone,
+        age: formData.age,
       },
     };
 
@@ -180,21 +161,16 @@ const ChewSettingsPage = () => {
   return (
     <DefaultLayout>
       <div className="mx-auto max-w-270">
-        <Breadcrumb pageName={`Chew ${formData?.full_name || "Unknown"}`} />
+        <Breadcrumb pageName={`Case ~ ${formData?.full_name || "Unknown"}`} />
         <form onSubmit={handleSubmit}>
           <div className="overflow-hidden rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               {Object.entries({
                 Email: "email",
+                "Name":"full_name",
                 Phone: "phone",
                 Gender: "gender",
-                Address: "home_address",
-                "Nearest Bus Stop": "nearest_bus_stop",
-                Symptoms: "symptoms",
-                "Current Prescription": "current_prescription",
-                Weight: "weight",
-                Height: "height",
-                "Blood Glucose": "blood_glucose",
+                Age: "age",
               }).map(([label, field]) => (
                 <InputField
                   key={field}
@@ -207,6 +183,62 @@ const ChewSettingsPage = () => {
                 />
               ))}
             </div>
+
+            {caseVisits.length > 0 && (
+              <div className="mt-6">
+                <h2 className="mb-4 text-lg font-semibold text-black dark:text-white">
+                  Case Visits
+                </h2>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-stroke dark:border-strokedark">
+                    <thead>
+                      <tr className="bg-gray-100 dark:bg-meta-4">
+                        <th className="border border-stroke px-4 py-2 dark:border-strokedark dark:text-white">
+                          Date
+                        </th>
+                        <th className="border border-stroke px-4 py-2 dark:border-strokedark dark:text-white">
+                          Weight
+                        </th>
+                        <th className="border border-stroke px-4 py-2 dark:border-strokedark dark:text-white">
+                          Height
+                        </th>
+                        <th className="border border-stroke px-4 py-2 dark:border-strokedark dark:text-white">
+                          Blood Pressure
+                        </th>
+                        <th className="border border-stroke px-4 py-2 dark:border-strokedark dark:text-white">
+                          Chew Notes
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {caseVisits.map((visit) => (
+                        <tr
+                          key={visit.id}
+                          className="hover:bg-gray-50 dark:hover:bg-meta-3"
+                        >
+                          <td className="border border-stroke px-4 py-2 dark:border-strokedark dark:text-white">
+                            {visit.attributes.date}
+                          </td>
+                          <td className="border border-stroke px-4 py-2 dark:border-strokedark dark:text-white">
+                            {visit.attributes.weight || "N/A"} Kgs
+                          </td>
+                          <td className="border border-stroke px-4 py-2 dark:border-strokedark dark:text-white">
+                            {visit.attributes.height || "N/A"} meters
+                          </td>
+                          <td className="border border-stroke px-4 py-2 dark:border-strokedark dark:text-white">
+                            {visit.attributes.blood_pressure || "N/A"}
+                          </td>
+                          <td className="border border-stroke px-4 py-2 dark:border-strokedark dark:text-white">
+                            {visit.attributes.chews_notes || "No notes"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
             <div className="mt-6 flex justify-between">
               <button
                 type="submit"
