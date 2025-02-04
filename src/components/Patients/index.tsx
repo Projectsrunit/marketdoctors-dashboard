@@ -8,7 +8,7 @@ interface Patient {
   full_name: string;
   picture_url: string;
   phone: string;
-  dateOfBirth: string;
+  createdAt: string;
   confirmed: boolean;
 }
 
@@ -21,7 +21,7 @@ const PatientsTable = () => {
     const fetchPatients = async () => {
       try {
         const response = await fetch(
-          `${API_BASE_URL}/api/users?populate=*&filters[role][id]=5`
+          `${API_BASE_URL}/api/users?populate=*&filters[role][id]=5`,
         );
         if (!response.ok) {
           throw new Error(`Error fetching doctors: ${response.statusText}`);
@@ -32,7 +32,14 @@ const PatientsTable = () => {
           id: user.id,
           full_name: user.firstName + " " + user.lastName,
           picture_url: user.picture_url || "/images/brand/blank_avatar.jpeg",
-          dateOfBirth: user.dateOfBirth || "0 years",
+          createdAt: new Intl.DateTimeFormat("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          }).format(new Date(user.createdAt)),
           phone: user.phone || "Not Listed",
           confirmed: user.confirmed,
         }));
@@ -50,14 +57,14 @@ const PatientsTable = () => {
 
   const exportToCSV = () => {
     const headers = ["ID,Full Name,Phone,Date of Birth,Confirmed"];
-    const rows = patients.map(patient =>
+    const rows = patients.map((patient) =>
       [
         patient.id,
         `"${patient.full_name}"`,
         patient.phone,
-        patient.dateOfBirth,
+        patient.createdAt,
         patient.confirmed ? "Confirmed" : "Pending",
-      ].join(",")
+      ].join(","),
     );
 
     const csvContent = [headers, ...rows].join("\n");
@@ -77,13 +84,13 @@ const PatientsTable = () => {
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <div className="flex justify-between items-center mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <h4 className="text-xl font-semibold text-black dark:text-white">
           Market Doctor Patients
         </h4>
         <button
           onClick={exportToCSV}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
         >
           Export CSV
         </button>
@@ -101,14 +108,16 @@ const PatientsTable = () => {
               Phone Number
             </h5>
           </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Date Of Birth
-            </h5>
-          </div>
+
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
               Confirmed Status
+            </h5>
+          </div>
+
+          <div className="p-2.5 text-center xl:p-5">
+            <h5 className="text-sm font-medium uppercase xsm:text-base">
+              Patient Created On{" "}
             </h5>
           </div>
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
@@ -145,10 +154,6 @@ const PatientsTable = () => {
               <p className="text-black dark:text-white">{patient.phone}</p>
             </div>
 
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">{patient.dateOfBirth}</p>
-            </div>
-
             <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
               <span
                 className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
@@ -159,6 +164,10 @@ const PatientsTable = () => {
               >
                 {patient.confirmed ? "Confirmed" : "Pending"}
               </span>
+            </div>
+
+            <div className="flex items-center justify-center p-2.5 xl:p-5">
+              <p className="text-black dark:text-white">{patient.createdAt}</p>
             </div>
 
             <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
