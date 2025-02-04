@@ -9,7 +9,7 @@ interface Doctor {
   full_name: string;
   picture_url: string;
   specialisation: string;
-  years_of_experience: number;
+  createdAt: string;
   confirmed: boolean;
 }
 
@@ -32,7 +32,14 @@ const DoctorTable = () => {
           id: user.id,
           full_name: user.firstName + "\t" + user.lastName,
           picture_url: user.picture_url || "/images/brand/person_avatar.svg",
-          years_of_experience: user.years_of_experience || "0 years",
+          createdAt: new Intl.DateTimeFormat("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          }).format(new Date(user.createdAt)),
           specialisation: user.specialisation || "Not Listed",
           confirmed: user.confirmed,
         }));
@@ -57,7 +64,7 @@ const DoctorTable = () => {
         doctor.id,
         `"${doctor.full_name}"`,
         doctor.specialisation,
-        doctor.years_of_experience,
+        doctor.createdAt,
         doctor.confirmed ? "Confirmed" : "Pending",
       ].join(","),
     );
@@ -77,9 +84,9 @@ const DoctorTable = () => {
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-         <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between">
         <h4 className="text-xl font-semibold text-black dark:text-white">
-         Doctor List
+          Doctor List
         </h4>
         <button
           onClick={exportToCSV}
@@ -101,14 +108,16 @@ const DoctorTable = () => {
               Speciality
             </h5>
           </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Years Of Experience
-            </h5>
-          </div>
+       
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
               Confirmed Status
+            </h5>
+          </div>
+
+          <div className="p-2.5 text-center xl:p-5">
+            <h5 className="text-sm font-medium uppercase xsm:text-base">
+              Doctor Created On 
             </h5>
           </div>
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
@@ -147,12 +156,6 @@ const DoctorTable = () => {
               </p>
             </div>
 
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">
-                {brand.years_of_experience}
-              </p>
-            </div>
-
             <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
               <span
                 className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
@@ -163,6 +166,9 @@ const DoctorTable = () => {
               >
                 {brand.confirmed ? "Confirmed" : "Pending"}
               </span>
+            </div>
+            <div className="flex items-center justify-center p-2.5 xl:p-5">
+              <p className="text-black dark:text-white">{brand.createdAt}</p>
             </div>
 
             <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">

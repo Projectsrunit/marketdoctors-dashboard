@@ -8,7 +8,7 @@ interface Chew {
   id: string;
   full_name: string;
   picture_url: string;
-  years_of_experience: number;
+  createdAt: string;
   confirmed: boolean;
   phone: string;
 }
@@ -32,7 +32,14 @@ const ChewTable = () => {
           id: user.id,
           full_name: user.firstName + "\t" + user.lastName,
           picture_url: user.picture_url || "/images/brand/person_avatar.svg",
-          years_of_experience: user.years_of_experience || "0 years",
+          createdAt: new Intl.DateTimeFormat("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          }).format(new Date(user.createdAt)),
           phone: user.phone || "Not Listed",
           confirmed: user.confirmed,
         }));
@@ -49,15 +56,13 @@ const ChewTable = () => {
   }, [API_BASE_URL]);
 
   const exportToCSV = () => {
-    const headers = [
-      "ID,Full Name,Phone,Years of Experience,Confirmed",
-    ];
+    const headers = ["ID,Full Name,Phone,Years of Experience,Confirmed"];
     const rows = chew.map((chew) =>
       [
         chew.id,
         `"${chew.full_name}"`,
         chew.phone,
-        chew.years_of_experience,
+        chew.createdAt,
         chew.confirmed ? "Confirmed" : "Pending",
       ].join(","),
     );
@@ -101,16 +106,16 @@ const ChewTable = () => {
               Phone Number
             </h5>
           </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Years Of Experience
-            </h5>
-          </div>
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
               Confirmed Status
             </h5>
           </div>
+          <div className="p-2.5 text-center xl:p-5">
+            <h5 className="text-sm font-medium uppercase xsm:text-base">
+CHEW CREATED ON            </h5>
+          </div>
+
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
               View Details{" "}
@@ -142,15 +147,7 @@ const ChewTable = () => {
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">
-                {brand.phone}
-              </p>
-            </div>
-
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">
-                {brand.years_of_experience}
-              </p>
+              <p className="text-black dark:text-white">{brand.phone}</p>
             </div>
 
             <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
@@ -163,6 +160,9 @@ const ChewTable = () => {
               >
                 {brand.confirmed ? "Confirmed" : "Pending"}
               </span>
+            </div>
+            <div className="flex items-center justify-center p-2.5 xl:p-5">
+              <p className="text-black dark:text-white">{brand.createdAt}</p>
             </div>
 
             <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
