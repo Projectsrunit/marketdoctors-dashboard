@@ -98,7 +98,7 @@ const ChewTable = () => {
       </div>
 
       <div className="flex flex-col">
-        <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-6">
+        <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-7">
           <div className="p-2.5 xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
               Name
@@ -119,10 +119,14 @@ const ChewTable = () => {
               Registered
             </h5>
           </div>
-
           <div className="p-2.5 text-center xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
               Cases
+            </h5>
+          </div>
+          <div className="hidden p-2.5 text-center sm:block xl:p-5">
+            <h5 className="text-sm font-medium uppercase xsm:text-base">
+              Pay
             </h5>
           </div>
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
@@ -134,7 +138,7 @@ const ChewTable = () => {
 
         {chew.map((brand, key) => (
           <div
-            className={`grid grid-cols-3 sm:grid-cols-6 ${
+            className={`grid grid-cols-3 sm:grid-cols-7 ${
               key === chew.length - 1
                 ? ""
                 : "border-b border-stroke dark:border-strokedark"
@@ -176,6 +180,15 @@ const ChewTable = () => {
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
               <p className="text-black dark:text-white">{brand.case_count}</p>
+            </div>
+
+            <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
+              <a
+                href={`/admin/chew/payment/${brand.id}`}
+                className="rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+              >
+                Pay
+              </a>
             </div>
 
             <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
