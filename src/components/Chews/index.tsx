@@ -11,12 +11,14 @@ interface Chew {
   createdAt: string;
   confirmed: boolean;
   phone: string;
+  case_count: number;
 }
 
 const ChewTable = () => {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
   const [chew, setChews] = useState<Chew[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
   useEffect(() => {
     const fetchChews = async () => {
       try {
@@ -34,14 +36,13 @@ const ChewTable = () => {
           picture_url: user.picture_url || "/images/brand/person_avatar.svg",
           createdAt: new Intl.DateTimeFormat("en-US", {
             year: "numeric",
-            month: "long",
+            month: "short",
             day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
             hour12: true,
           }).format(new Date(user.createdAt)),
           phone: user.phone || "Not Listed",
           confirmed: user.confirmed,
+          case_count: user.cases?.length || 0,
         }));
 
         setChews(chewsData);
@@ -56,7 +57,7 @@ const ChewTable = () => {
   }, [API_BASE_URL]);
 
   const exportToCSV = () => {
-    const headers = ["ID,Full Name,Phone,Years of Experience,Confirmed"];
+    const headers = ["ID,Full Name,Phone,Years of Experience,Confirmed,Case Count"];
     const rows = chew.map((chew) =>
       [
         chew.id,
@@ -64,6 +65,7 @@ const ChewTable = () => {
         chew.phone,
         chew.createdAt,
         chew.confirmed ? "Confirmed" : "Pending",
+        chew.case_count
       ].join(","),
     );
     const csv = headers.concat(rows).join("\n");
@@ -76,6 +78,7 @@ const ChewTable = () => {
     a.click();
     document.body.removeChild(a);
   };
+
   if (loading) {
     return <Loader />;
   }
@@ -95,7 +98,7 @@ const ChewTable = () => {
       </div>
 
       <div className="flex flex-col">
-        <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-5">
+        <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-6">
           <div className="p-2.5 xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
               Name
@@ -103,30 +106,35 @@ const ChewTable = () => {
           </div>
           <div className="p-2.5 text-center xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Phone Number
+              Contact
             </h5>
           </div>
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Confirmed Status
+              Status
             </h5>
           </div>
           <div className="p-2.5 text-center xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
-              CHEW CREATED ON{" "}
+              Registered
             </h5>
           </div>
 
+          <div className="p-2.5 text-center xl:p-5">
+            <h5 className="text-sm font-medium uppercase xsm:text-base">
+              Cases
+            </h5>
+          </div>
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
-              View Details{" "}
+              View Details
             </h5>
           </div>
         </div>
 
         {chew.map((brand, key) => (
           <div
-            className={`grid grid-cols-3 sm:grid-cols-5 ${
+            className={`grid grid-cols-3 sm:grid-cols-6 ${
               key === chew.length - 1
                 ? ""
                 : "border-b border-stroke dark:border-strokedark"
@@ -164,6 +172,10 @@ const ChewTable = () => {
             </div>
             <div className="flex items-center justify-center p-2.5 xl:p-5">
               <p className="text-black dark:text-white">{brand.createdAt}</p>
+            </div>
+
+            <div className="flex items-center justify-center p-2.5 xl:p-5">
+              <p className="text-black dark:text-white">{brand.case_count}</p>
             </div>
 
             <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
