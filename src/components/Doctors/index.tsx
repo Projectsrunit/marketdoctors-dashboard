@@ -7,7 +7,7 @@ import Loader from "../common/Loader";
 interface Doctor {
   id: string;
   full_name: string;
-  picture_url: string;
+  profile_picture: string;
   specialisation: string;
   createdAt: string;
   confirmed: boolean;
@@ -31,7 +31,7 @@ const DoctorTable = () => {
         const doctorsData: Doctor[] = result.map((user: any) => ({
           id: user.id,
           full_name: user.firstName + "\t" + user.lastName,
-          picture_url: user.picture_url || "/images/brand/person_avatar.svg",
+          profile_picture: user.profile_picture || "/images/brand/person_avatar.svg",
           createdAt: new Intl.DateTimeFormat("en-US", {
             year: "numeric",
             month: "long",
@@ -138,8 +138,9 @@ const DoctorTable = () => {
           >
             <div className="flex items-center gap-3 p-2.5 xl:p-5">
               <div className="flex-shrink-0">
-                <Image
-                  src={brand.picture_url}
+                <img
+  className="w-18 h-18 rounded-full"
+  src={brand.profile_picture}
                   alt="Brand"
                   width={48}
                   height={48}

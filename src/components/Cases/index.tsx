@@ -17,7 +17,7 @@ interface CaseVisit {
 interface Chew {
   id: string;
   full_name: string;
-  picture_url: string;
+  profile_picture: string;
   symptoms: string[];
   chews_notes: string[];
   phone: string;
@@ -67,7 +67,7 @@ const CasesTable = () => {
           return {
             id: user.id.toString(),
             full_name: `${user.attributes.first_name} ${user.attributes.last_name}`,
-            picture_url: "/images/brand/person_avatar.svg",
+            profile_picture: user.attributes.profile_picture|| "/images/brand/person_avatar.svg",
             symptoms: allSymptoms,
             phone: user.attributes.phone_number || "Not Listed",
             chews_notes: allChewNotes,
