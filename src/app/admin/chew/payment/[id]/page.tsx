@@ -10,9 +10,6 @@ interface ChewPayment {
   lastName: string;
   email: string;
   phone: string;
-  bank_code?: string;
-  account_number?: string;
-  recipient_code?: string;
 }
 
 const ChewPaymentPage = () => {
@@ -43,9 +40,6 @@ const ChewPaymentPage = () => {
           lastName: data.lastName,
           email: data.email,
           phone: data.phone,
-          bank_code: data.bank_code,
-          account_number: data.account_number,
-          recipient_code: data.recipient_code
         });
       } catch (error) {
         setError('Failed to load CHEW details');
@@ -57,74 +51,30 @@ const ChewPaymentPage = () => {
     fetchChewDetails();
   }, [API_BASE_URL, params.id]);
 
-  const createTransferRecipient = async () => {
-    if (!chew?.bank_code || !chew?.account_number) {
-      setError('Bank details are not complete');
-      return null;
-    }
-
-    try {
-      const response = await fetch('/api/paystack/create-recipient', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: 'nuban',
-          name: `${chew.firstName} ${chew.lastName}`,
-          account_number: chew.account_number,
-          bank_code: chew.bank_code,
-          currency: 'NGN'
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to create transfer recipient');
-      }
-
-      return data.data.recipient_code;
-    } catch (error) {
-      setError('Failed to create transfer recipient');
-      return null;
-    }
-  };
-
-  const initiateTransfer = async () => {
+  const initiateMobileTransfer = async () => {
     setTransferLoading(true);
     setError('');
     setSuccess('');
 
+    if (!chew?.phone) {
+      setError('Phone number is required for mobile money transfer');
+      setTransferLoading(false);
+      return;
+    }
+
     try {
-      let recipientCode = chew?.recipient_code;
-
-      if (!recipientCode) {
-        recipientCode = await createTransferRecipient();
-        if (!recipientCode) {
-          return;
-        }
-
-        // Save recipient code to user profile
-        await fetch(`${API_BASE_URL}/api/users/${chew?.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            recipient_code: recipientCode
-          }),
-        });
-      }
-
-      const response = await fetch('/api/paystack/initiate-transfer', {
+      const response = await fetch('/api/paystack/mobile-transfer', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          recipient: recipientCode,
           amount: parseFloat(amount) * 100, // Convert to kobo
-          reason: `Payment to ${chew?.firstName} ${chew?.lastName}`
+          recipient: {
+            name: `${chew.firstName} ${chew.lastName}`,
+            phone: chew.phone
+          },
+          reason: `Payment to ${chew.firstName} ${chew.lastName}`
         }),
       });
 
@@ -133,10 +83,10 @@ const ChewPaymentPage = () => {
         throw new Error(data.message || 'Transfer failed');
       }
 
-      setSuccess('Transfer initiated successfully!');
+      setSuccess('Mobile money transfer initiated successfully! The recipient will receive an SMS to complete the transaction.');
       setAmount('');
     } catch (error: any) {
-      setError(error.message || 'Failed to process transfer');
+      setError(error.message || 'Failed to process mobile money transfer');
     } finally {
       setTransferLoading(false);
     }
@@ -153,6 +103,15 @@ const ChewPaymentPage = () => {
           Pay CHEW: {chew?.firstName} {chew?.lastName}
         </h2>
 
+        <div className="mb-4">
+          <label className="mb-2.5 block font-medium text-black dark:text-white">
+            Recipient Phone Number
+          </label>
+          <div className="rounded border border-stroke bg-gray-100 px-4 py-3 dark:border-strokedark dark:bg-meta-4">
+            {chew?.phone || 'No phone number available'}
+          </div>
+        </div>
+
         {error && (
           <div className="mb-4 rounded-md bg-red-50 p-4 text-red-600">
             {error}
@@ -166,7 +125,7 @@ const ChewPaymentPage = () => {
         )}
 
         <div className="mb-4">
-          <label className="mb-2.5 block text-black dark:text-white">
+          <label className="mb-2.5 block font-medium text-black dark:text-white">
             Amount (NGN)
           </label>
           <input
@@ -178,18 +137,18 @@ const ChewPaymentPage = () => {
           />
         </div>
 
-        {(!chew?.bank_code || !chew?.account_number) && (
+        {!chew?.phone && (
           <div className="mb-4 rounded-md bg-yellow-50 p-4 text-yellow-600">
-            Please ensure the CHEW has added their bank details before making a transfer.
+            Please ensure the CHEW has added their phone number before making a transfer.
           </div>
         )}
 
         <button
-          onClick={initiateTransfer}
-          disabled={transferLoading || !amount || !chew?.bank_code || !chew?.account_number}
+          onClick={initiateMobileTransfer}
+          disabled={transferLoading || !amount || !chew?.phone}
           className="flex w-full justify-center rounded bg-primary p-3 font-medium text-white disabled:bg-opacity-50"
         >
-          {transferLoading ? 'Processing...' : 'Initiate Transfer'}
+          {transferLoading ? 'Processing...' : 'Send Mobile Money'}
         </button>
       </div>
     </div>
