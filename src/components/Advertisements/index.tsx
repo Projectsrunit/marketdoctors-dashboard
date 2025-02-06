@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Loader from "../common/Loader";
 import { toast } from "react-toastify";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -27,10 +28,22 @@ const Advertisement = () => {
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [articleToDelete, setArticleToDelete] = useState<Article | null>(null);
 
   useEffect(() => {
     fetchArticles();
   }, []);
+
+  useEffect(() => {
+    if (selectedArticle) {
+      setFormData({
+        text: selectedArticle.attributes.text,
+        image_url: selectedArticle.attributes.image_url,
+      });
+      setFilePreview(selectedArticle.attributes.image_url);
+    }
+  }, [selectedArticle]);
 
   const fetchArticles = async () => {
     try {
@@ -39,6 +52,7 @@ const Advertisement = () => {
       setArticles(response.data.data);
     } catch (error) {
       console.error("Error fetching articles:", error);
+      toast.error("Failed to fetch advertisements");
     } finally {
       setLoading(false);
     }
@@ -106,20 +120,61 @@ const Advertisement = () => {
         data: { text: formData.text, image_url: formData.image_url },
       };
 
-      const response = await fetch(`${API_BASE_URL}/api/adverts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      if (selectedArticle) {
+        // Update existing advertisement
+        const response = await fetch(`${API_BASE_URL}/api/adverts/${selectedArticle.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
 
-      if (!response.ok) throw new Error("Failed to submit advertisement");
+        if (!response.ok) throw new Error("Failed to update advertisement");
+        toast.success("Advertisement updated successfully!");
+      } else {
+        // Create new advertisement
+        const response = await fetch(`${API_BASE_URL}/api/adverts`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
 
-      toast.success("Advertisement submitted successfully!");
+        if (!response.ok) throw new Error("Failed to submit advertisement");
+        toast.success("Advertisement created successfully!");
+      }
+
       handleCloseModal();
       fetchArticles();
     } catch (error) {
       console.error("Error submitting advertisement:", error);
-      toast.error("Failed to submit advertisement.");
+      toast.error(selectedArticle ? "Failed to update advertisement." : "Failed to submit advertisement.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = (article: Article) => {
+    setSelectedArticle(article);
+    setShowModal(true);
+  };
+
+  const handleDelete = async () => {
+    if (!articleToDelete) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/adverts/${articleToDelete.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Failed to delete advertisement");
+
+      toast.success("Advertisement deleted successfully!");
+      setShowDeleteConfirm(false);
+      setArticleToDelete(null);
+      fetchArticles();
+    } catch (error) {
+      console.error("Error deleting advertisement:", error);
+      toast.error("Failed to delete advertisement.");
     } finally {
       setLoading(false);
     }
@@ -135,7 +190,7 @@ const Advertisement = () => {
             <button
               type="button"
               onClick={handleCloseModal}
-              className="bg-gray-200 hover:bg-gray-300 absolute right-3 top-3 rounded-full p-2"
+              className="absolute right-3 top-3 rounded-full bg-gray-200 p-2 hover:bg-gray-300"
             >
               ✕
             </button>
@@ -183,8 +238,7 @@ const Advertisement = () => {
                   onClick={handleUpload}
                   disabled={uploading}
                 >
-                  Upload Image
-                  {/* {uploading ? "Uploading..." : "Upload Image"} */}
+                  {uploading ? "Uploading..." : "Upload Image"}
                 </button>
               </div>
 
@@ -192,7 +246,7 @@ const Advertisement = () => {
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="bg-gray-400 hover:bg-gray-500 rounded-lg px-4 py-2 text-white"
+                  className="rounded-lg bg-gray-400 px-4 py-2 text-white hover:bg-gray-500"
                 >
                   Cancel
                 </button>
@@ -209,12 +263,42 @@ const Advertisement = () => {
         </div>
       )}
 
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black bg-opacity-50">
+          <div className="relative mx-4 w-full max-w-md rounded-lg bg-white p-8 shadow-lg dark:bg-boxdark">
+            <h3 className="mb-4 text-xl font-semibold text-black dark:text-white">
+              Confirm Delete
+            </h3>
+            <p className="mb-6 text-base text-body-color dark:text-bodydark">
+              Are you sure you want to delete this advertisement?
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setArticleToDelete(null);
+                }}
+                className="min-w-[100px] rounded-lg border border-stroke bg-white px-6 py-2.5 text-center text-sm font-medium text-black shadow-sm transition-all hover:bg-gray-100 dark:border-strokedark dark:bg-meta-4 dark:text-white dark:hover:bg-opacity-90"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="min-w-[100px] rounded-lg bg-danger px-6 py-2.5 text-center text-sm font-medium text-white shadow-sm transition-all hover:bg-opacity-90 dark:bg-danger dark:hover:bg-opacity-90"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="mb-4 flex items-center justify-between">
           <h1 className="text-xl font-bold dark:text-white">Advertisements</h1>
           <button
             onClick={() => setShowModal(true)}
-            className="text-primary underline hover:no-underline dark:text-white"
+            className="rounded-lg bg-primary px-4 py-2 text-white hover:bg-opacity-90"
           >
             Add Advertisement
           </button>
@@ -224,9 +308,25 @@ const Advertisement = () => {
           {articles.map((article) => (
             <div
               key={article.id}
-              className="cursor-pointer rounded-lg border p-4 shadow-md hover:shadow-lg"
-              onClick={() => setSelectedArticle(article)}
+              className="relative rounded-lg border p-4 shadow-md hover:shadow-lg"
             >
+              <div className="absolute right-2 top-2 flex gap-2">
+                <button
+                  onClick={() => handleEdit(article)}
+                  className="rounded-full bg-blue-100 p-2 text-blue-600 hover:bg-blue-200"
+                >
+                  <FaEdit />
+                </button>
+                <button
+                  onClick={() => {
+                    setArticleToDelete(article);
+                    setShowDeleteConfirm(true);
+                  }}
+                  className="rounded-full bg-red-100 p-2 text-red-600 hover:bg-red-200"
+                >
+                  <FaTrash />
+                </button>
+              </div>
               <img
                 src={article.attributes.image_url}
                 alt="Advertisement"
@@ -235,7 +335,7 @@ const Advertisement = () => {
               <h3 className="text-lg font-semibold dark:text-white">
                 {article.attributes.text}
               </h3>
-              <p className="text-gray-500 text-sm dark:text-white">
+              <p className="text-sm text-gray-500 dark:text-white">
                 Created At: {article.attributes.createdAt}
               </p>
             </div>
