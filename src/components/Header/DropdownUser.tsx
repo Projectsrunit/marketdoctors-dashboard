@@ -20,9 +20,9 @@ const DropdownUser = () => {
         </span>
 
         <span className="h-12 w-12 rounded-full">
-          <Image
-            width={112}
-            height={112}
+          <img
+            className="w-18 h-18 rounded-full"
+
             src={"/images/brand/blank_avatar.jpeg"}
             style={{
               width: "auto",

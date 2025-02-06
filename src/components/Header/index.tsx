@@ -111,20 +111,20 @@ const Header = (props: {
             {/* <!-- Dark Mode Toggler --> */}
 
             {/* <!-- Notification Menu Area --> */}
-            <DropdownNotification />
+            {/* <DropdownNotification /> */}
             {/* <!-- Notification Menu Area --> */}
 
             {/* <!-- Chat Notification Area --> */}
-            <DropdownMessage />
+            {/* <DropdownMessage /> */}
             {/* <!-- Chat Notification Area --> */}
 
             {/* <!-- Notification Button --> */}
-            <Link
+            {/* <Link
               href="/admin/notifications"
               className="flex h-8.5 w-8.5 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-meta-4 dark:text-white"
             >
               <FaBell className="fill-current duration-300 ease-in-out" />
-            </Link>
+            </Link> */}
           </ul>
 
           {/* <!-- User Area --> */}
