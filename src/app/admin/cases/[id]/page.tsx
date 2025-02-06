@@ -124,6 +124,7 @@ const ChewSettingsPage = () => {
         email: formData.email,
         phone_number: formData.phone,
         age: formData.age,
+        gender: formData.gender,
       },
     };
 
@@ -163,11 +164,12 @@ const ChewSettingsPage = () => {
       <div className="mx-auto max-w-270">
         <Breadcrumb pageName={`Case ~ ${formData?.full_name || "Unknown"}`} />
         <form onSubmit={handleSubmit}>
+
           <div className="overflow-hidden rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               {Object.entries({
                 Email: "email",
-                "Name":"full_name",
+                Name: "full_name",
                 Phone: "phone",
                 Gender: "gender",
                 Age: "age",
