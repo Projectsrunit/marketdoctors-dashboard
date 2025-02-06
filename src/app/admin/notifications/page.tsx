@@ -15,43 +15,41 @@ const NotificationsPage = () => {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
   const [sending, setSending] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<string>('');
-  const [title, setTitle] = useState('');
-  const [message, setMessage] = useState('');
+  const [groupTitle, setGroupTitle] = useState('');
+  const [groupMessage, setGroupMessage] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const sendNotification = async () => {
-    if (!selectedGroup || !title || !message) {
-      setError('Please fill in all fields');
+  // Individual message state
+  const [email, setEmail] = useState('');
+  const [individualTitle, setIndividualTitle] = useState('');
+  const [individualMessage, setIndividualMessage] = useState('');
+  const [sendingIndividual, setSendingIndividual] = useState(false);
+
+  const sendIndividualNotification = async () => {
+    if (!email || !individualTitle || !individualMessage) {
+      setError('Please fill in all fields for individual message');
       return;
     }
 
-    setSending(true);
+    setSendingIndividual(true);
     setError('');
     setSuccess('');
 
     try {
-      console.log('Sending notification to:', `${API_BASE_URL}/api/notifications/send`);
-      console.log('Payload:', {
-        segment: selectedGroup,
-        title,
-        message,
-      });
-
-      const response = await fetch(`${API_BASE_URL}/api/notifications/send`, {
+      const response = await fetch(`${API_BASE_URL}/api/notifications/send-individual`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
         body: JSON.stringify({
-          segment: selectedGroup,
-          title,
-          message,
+          email,
+          title: individualTitle,
+          message: individualMessage,
         }),
       });
 
-      // Log the raw response for debugging
       const responseText = await response.text();
       console.log('Raw response:', responseText);
 
@@ -66,9 +64,66 @@ const NotificationsPage = () => {
         throw new Error(data.message || `Failed to send notification: ${response.statusText}`);
       }
 
-      setSuccess('Notification sent successfully!');
-      setTitle('');
-      setMessage('');
+      setSuccess('Individual notification sent successfully!');
+      setEmail('');
+      setIndividualTitle('');
+      setIndividualMessage('');
+    } catch (error: any) {
+      console.error('Error details:', error);
+      setError(error.message || 'Failed to send individual notification');
+    } finally {
+      setSendingIndividual(false);
+    }
+  };
+
+  const sendGroupNotification = async () => {
+    if (!selectedGroup || !groupTitle || !groupMessage) {
+      setError('Please fill in all fields for group message');
+      return;
+    }
+
+    setSending(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      console.log('Sending notification to:', `${API_BASE_URL}/api/notifications/send`);
+      console.log('Payload:', {
+        segment: selectedGroup,
+        title: groupTitle,
+        message: groupMessage,
+      });
+
+      const response = await fetch(`${API_BASE_URL}/api/notifications/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          segment: selectedGroup,
+          title: groupTitle,
+          message: groupMessage,
+        }),
+      });
+
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        throw new Error(`Server response: ${responseText}`);
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || `Failed to send notification: ${response.statusText}`);
+      }
+
+      setSuccess('Group notification sent successfully!');
+      setGroupTitle('');
+      setGroupMessage('');
       setSelectedGroup('');
     } catch (error: any) {
       console.error('Error details:', error);
@@ -86,7 +141,7 @@ const NotificationsPage = () => {
             Send Push Notifications
           </h2>
           <p className="mt-1 text-gray-500 dark:text-gray-400">
-            Send targeted notifications to specific user groups
+            Send notifications to individual users or groups
           </p>
         </div>
         <button
@@ -97,7 +152,12 @@ const NotificationsPage = () => {
         </button>
       </div>
 
-      <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+      {/* Individual User Notification Section */}
+      <div className="mb-8 rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <h3 className="mb-4 text-xl font-semibold text-black dark:text-white">
+          Send to Individual User
+        </h3>
+
         {error && (
           <div className="mb-4 rounded-md bg-red-50 p-4 text-red-600">
             {error}
@@ -111,6 +171,60 @@ const NotificationsPage = () => {
             </div>
           </div>
         )}
+
+        <div className="mb-4">
+          <label className="mb-2.5 block font-medium text-black dark:text-white">
+            User Email
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter user email"
+            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="mb-2.5 block font-medium text-black dark:text-white">
+            Notification Title
+          </label>
+          <input
+            type="text"
+            value={individualTitle}
+            onChange={(e) => setIndividualTitle(e.target.value)}
+            placeholder="Enter notification title"
+            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="mb-2.5 block font-medium text-black dark:text-white">
+            Message
+          </label>
+          <textarea
+            value={individualMessage}
+            onChange={(e) => setIndividualMessage(e.target.value)}
+            placeholder="Enter notification message"
+            rows={4}
+            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+          />
+        </div>
+
+        <button
+          onClick={sendIndividualNotification}
+          disabled={sendingIndividual || !email || !individualTitle || !individualMessage}
+          className="flex w-full justify-center rounded bg-primary p-3 font-medium text-white transition hover:bg-opacity-90 disabled:bg-opacity-50"
+        >
+          {sendingIndividual ? 'Sending...' : 'Send Individual Notification'}
+        </button>
+      </div>
+
+      {/* Group Notification Section */}
+      <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <h3 className="mb-4 text-xl font-semibold text-black dark:text-white">
+          Send to User Group
+        </h3>
 
         <div className="mb-4">
           <label className="mb-2.5 block font-medium text-black dark:text-white">
@@ -136,8 +250,8 @@ const NotificationsPage = () => {
           </label>
           <input
             type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            value={groupTitle}
+            onChange={(e) => setGroupTitle(e.target.value)}
             placeholder="Enter notification title"
             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           />
@@ -148,8 +262,8 @@ const NotificationsPage = () => {
             Message
           </label>
           <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            value={groupMessage}
+            onChange={(e) => setGroupMessage(e.target.value)}
             placeholder="Enter notification message"
             rows={4}
             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -157,11 +271,11 @@ const NotificationsPage = () => {
         </div>
 
         <button
-          onClick={sendNotification}
-          disabled={sending || !selectedGroup || !title || !message}
+          onClick={sendGroupNotification}
+          disabled={sending || !selectedGroup || !groupTitle || !groupMessage}
           className="flex w-full justify-center rounded bg-primary p-3 font-medium text-white transition hover:bg-opacity-90 disabled:bg-opacity-50"
         >
-          {sending ? 'Sending...' : 'Send Notification'}
+          {sending ? 'Sending...' : 'Send Group Notification'}
         </button>
       </div>
     </div>
