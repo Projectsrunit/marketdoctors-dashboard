@@ -125,52 +125,52 @@ const DoctorTable = () => {
           </div>
         </div>
 
-        {doctor.map((doctor, key) => (
+        {doctor.map((doctorItem, index) => (
           <div
+            key={doctorItem.id}
             className={`grid grid-cols-3 sm:grid-cols-5 ${
-              key === doctor.length - 1
+              index === doctor.length - 1
                 ? ""
                 : "border-b border-stroke dark:border-strokedark"
             }`}
-            key={doctor.id}
           >
             <div className="flex items-center gap-3 p-2.5 xl:p-5">
               <div className="flex-shrink-0">
                 <Image
-                  src={doctor.profile_picture}
+                  src={doctorItem.profile_picture}
                   alt="Doctor"
                   width={48}
                   height={48}
                 />
               </div>
               <p className="hidden capitalize text-black dark:text-white sm:block">
-                {doctor.full_name}
+                {doctorItem.full_name}
               </p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">{doctor.specialisation}</p>
+              <p className="text-black dark:text-white">{doctorItem.specialisation}</p>
             </div>
 
             <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
               <span
                 className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
-                  doctor.confirmed
+                  doctorItem.confirmed
                     ? "bg-green-100 text-green-800"
                     : "bg-yellow-100 text-yellow-800"
                 }`}
               >
-                {doctor.confirmed ? "Confirmed" : "Pending"}
+                {doctorItem.confirmed ? "Confirmed" : "Pending"}
               </span>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">{doctor.createdAt}</p>
+              <p className="text-black dark:text-white">{doctorItem.createdAt}</p>
             </div>
 
             <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
               <a
-                href={`/admin/doctor/${doctor.id}`}
+                href={`/admin/doctor/${doctorItem.id}`}
                 className="text-blue-600 hover:underline dark:text-blue-400"
               >
                 View Details
