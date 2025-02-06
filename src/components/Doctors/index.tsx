@@ -108,73 +108,69 @@ const DoctorTable = () => {
               Speciality
             </h5>
           </div>
-       
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
               Confirmed Status
             </h5>
           </div>
-
           <div className="p-2.5 text-center xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Doctor Created On 
+              Doctor Created On
             </h5>
           </div>
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
-              View Details{" "}
+              View Details
             </h5>
           </div>
         </div>
 
-        {doctor.map((brand, key) => (
+        {doctor.map((doctor, key) => (
           <div
             className={`grid grid-cols-3 sm:grid-cols-5 ${
               key === doctor.length - 1
                 ? ""
                 : "border-b border-stroke dark:border-strokedark"
             }`}
-            key={key}
+            key={doctor.id}
           >
             <div className="flex items-center gap-3 p-2.5 xl:p-5">
               <div className="flex-shrink-0">
-                <img
-  className="w-18 h-18 rounded-full"
-  src={brand.profile_picture}
-                  alt="Brand"
+                <Image
+                  src={doctor.profile_picture}
+                  alt="Doctor"
                   width={48}
                   height={48}
                 />
               </div>
               <p className="hidden capitalize text-black dark:text-white sm:block">
-                {brand.full_name}
+                {doctor.full_name}
               </p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">
-                {brand.specialisation}
-              </p>
+              <p className="text-black dark:text-white">{doctor.specialisation}</p>
             </div>
 
             <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
               <span
                 className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
-                  brand.confirmed
+                  doctor.confirmed
                     ? "bg-green-100 text-green-800"
                     : "bg-yellow-100 text-yellow-800"
                 }`}
               >
-                {brand.confirmed ? "Confirmed" : "Pending"}
+                {doctor.confirmed ? "Confirmed" : "Pending"}
               </span>
             </div>
+
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">{brand.createdAt}</p>
+              <p className="text-black dark:text-white">{doctor.createdAt}</p>
             </div>
 
             <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
               <a
-                href={`/admin/doctor/${brand.id}`}
+                href={`/admin/doctor/${doctor.id}`}
                 className="text-blue-600 hover:underline dark:text-blue-400"
               >
                 View Details
