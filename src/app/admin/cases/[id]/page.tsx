@@ -61,6 +61,7 @@ const ChewSettingsPage = () => {
   const [formData, setFormData] = useState<Case | null>(null);
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
   const [caseVisits, setCaseVisits] = useState<any[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -156,6 +157,25 @@ const ChewSettingsPage = () => {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/cases/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete case");
+      }
+
+      toast.success("Case deleted successfully");
+      // Redirect to cases list
+      window.location.href = "/admin/cases";
+    } catch (error) {
+      console.error("Error deleting case:", error);
+      toast.error("Failed to delete case");
+    }
+  };
+
   if (loading) return <Loader />;
   if (error) return <p>{error}</p>;
 
@@ -163,8 +183,35 @@ const ChewSettingsPage = () => {
     <DefaultLayout>
       <div className="mx-auto max-w-270">
         <Breadcrumb pageName={`Case ~ ${formData?.full_name || "Unknown"}`} />
-        <form onSubmit={handleSubmit}>
 
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-boxdark">
+              <h3 className="mb-4 text-xl font-semibold text-black dark:text-white">
+                Confirm Delete
+              </h3>
+              <p className="mb-6 text-base">
+                Are you sure you want to delete this case? This action cannot be undone.
+              </p>
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="rounded-lg border border-stroke bg-white px-6 py-2 text-black hover:bg-gray-100 dark:border-strokedark dark:bg-meta-4 dark:text-white dark:hover:bg-opacity-90"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="rounded-lg bg-danger px-6 py-2 text-white hover:bg-opacity-90"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
           <div className="overflow-hidden rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               {Object.entries({
@@ -247,6 +294,13 @@ const ChewSettingsPage = () => {
                 className="hover:bg-primarydark focus:bg-primarydark w-1/4 rounded bg-primary py-3 text-white focus-visible:outline-none"
               >
                 Update Profile
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="w-1/4 rounded bg-danger py-3 text-white hover:bg-opacity-90 focus-visible:outline-none"
+              >
+                Delete Case
               </button>
             </div>
           </div>
