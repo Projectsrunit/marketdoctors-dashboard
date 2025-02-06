@@ -12,7 +12,7 @@ interface Doctor {
   full_name: string | null;
   profile_picture: string | null;
   specialisation: string[];
-  years_of_experience: number;
+  years_of_experience: number | null;
   confirmed: boolean;
   email: string;
   phone: string;
@@ -93,7 +93,7 @@ const DoctorSettingsPage = () => {
         profile_picture: result.profile_picture || "/default-avatar.png",
         specialisation: result.specialisation ? [result.specialisation] : [],
         awards: result.awards ? result.awards : [],
-        years_of_experience: Number(result.years_of_experience) || 0,
+        years_of_experience: Number(result.years_of_experience) || null,
         email: result.email,
         phone: result.phone,
         gender: result.gender || "",
@@ -205,7 +205,15 @@ const DoctorSettingsPage = () => {
       const { name, value, type, checked } = e.target;
       setFormData({
         ...formData,
-        [name]: type === "checkbox" ? checked : value,
+
+        [name]:
+          value === ""
+            ? null
+            : ["years_of_experience", "consultation_fee", "doctorId"].includes(
+                  name,
+                )
+              ? Number(value) || null
+              : value,
       });
     }
   };
