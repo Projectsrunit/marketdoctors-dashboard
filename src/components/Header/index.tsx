@@ -1,9 +1,11 @@
+"use client";
 import Link from "next/link";
 import DarkModeSwitcher from "./DarkModeSwitcher";
 import DropdownMessage from "./DropdownMessage";
 import DropdownNotification from "./DropdownNotification";
 import DropdownUser from "./DropdownUser";
 import Image from "next/image";
+import { FaBell } from "react-icons/fa";
 
 const Header = (props: {
   sidebarOpen: string | boolean | undefined;
@@ -60,7 +62,7 @@ const Header = (props: {
             <Image
               width={32}
               height={32}
-              src={"/images/logo/logo.png"}
+              src={"/images/logo/logo-icon.svg"}
               alt="Logo"
             />
           </Link>
@@ -109,12 +111,20 @@ const Header = (props: {
             {/* <!-- Dark Mode Toggler --> */}
 
             {/* <!-- Notification Menu Area --> */}
-            {/* <DropdownNotification /> */}
+            <DropdownNotification />
             {/* <!-- Notification Menu Area --> */}
 
             {/* <!-- Chat Notification Area --> */}
-            {/* <DropdownMessage /> */}
+            <DropdownMessage />
             {/* <!-- Chat Notification Area --> */}
+
+            {/* <!-- Notification Button --> */}
+            <Link
+              href="/admin/notifications"
+              className="flex h-8.5 w-8.5 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-meta-4 dark:text-white"
+            >
+              <FaBell className="fill-current duration-300 ease-in-out" />
+            </Link>
           </ul>
 
           {/* <!-- User Area --> */}
