@@ -1,17 +1,19 @@
 import { NextResponse } from 'next/server';
 
+type UserSegment = 'chew' | 'doctor' | 'patient';
+
+const segmentMapping: Record<UserSegment, string> = {
+  chew: 'Subscribed CHEWs',
+  doctor: 'Subscribed Doctors',
+  patient: 'Subscribed Patients'
+};
+
 export async function POST(req: Request) {
   try {
     const { segment, title, message } = await req.json();
 
-    // Map segment to OneSignal segment names
-    const segmentName = {
-      chew: 'Subscribed CHEWs',
-      doctor: 'Subscribed Doctors',
-      patient: 'Subscribed Patients'
-    }[segment];
-
-    if (!segmentName) {
+    // Type check for segment
+    if (!segmentMapping[segment as UserSegment]) {
       return NextResponse.json(
         { message: 'Invalid user segment' },
         { status: 400 }
@@ -20,7 +22,7 @@ export async function POST(req: Request) {
 
     const notification = {
       app_id: process.env.ONESIGNAL_APP_ID,
-      included_segments: [segmentName],
+      included_segments: [segmentMapping[segment as UserSegment]],
       contents: {
         en: message
       },
