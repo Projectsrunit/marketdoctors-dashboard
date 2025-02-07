@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Loader from "../common/Loader";
 import { toast } from "react-toastify";
+import { FaPencilAlt, FaTrash } from "react-icons/fa";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -122,6 +123,7 @@ const Articles = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Only require image for new articles, not for updates
     if (!formData.feauture_image) {
       toast.error("Please upload an image first.");
       return;
@@ -135,10 +137,11 @@ const Articles = () => {
     }
 
     setLoadingState("submitting");
+
     const payload = {
       data: {
         ...formData,
-      },
+      }
     };
 
     try {
@@ -146,39 +149,74 @@ const Articles = () => {
         // Update article
         await axios.put(
           `${API_BASE_URL}/api/health-tips/${selectedArticle.id}`,
-          data,
+          payload,
           {
-            headers: { "Content-Type": "multipart/form-data" },
-          },
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
         );
+        
         setArticles((prevArticles) =>
           prevArticles.map((article) =>
             article.id === selectedArticle.id
               ? {
                   ...article,
-                  attributes: { ...article.attributes, ...formData },
+                  attributes: { 
+                    ...article.attributes,
+                    title: formData.title,
+                    description: formData.description,
+                    category: formData.category,
+                    feauture_image: formData.feauture_image || article.attributes.feauture_image
+                  },
                 }
-              : article,
-          ),
+              : article
+          )
         );
       } else {
         // Create new article
         const response = await axios.post(
           `${API_BASE_URL}/api/health-tips`,
-          payload, // Directly passing payload
+          payload,
           {
             headers: {
-              "Content-Type": "application/json",
-            },
-          },
+              "Content-Type": "application/json"
+            }
+          }
         );
 
         setArticles((prevArticles) => [...prevArticles, response.data.data]);
       }
+      
+      toast.success(selectedArticle ? "Article updated successfully!" : "Article created successfully!");
       handleCloseModal();
     } catch (error) {
       console.error("Error submitting article:", error);
       toast.error("Failed to submit article.");
+    } finally {
+      setLoadingState(null);
+    }
+  };
+
+  const handleDeleteArticle = async (articleId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!window.confirm('Are you sure you want to delete this article?')) {
+      return;
+    }
+
+    setLoadingState("deleting");
+    try {
+      await axios.delete(`${API_BASE_URL}/api/health-tips/${articleId}`);
+      
+      setArticles((prevArticles) => 
+        prevArticles.filter(article => article.id !== articleId)
+      );
+      
+      toast.success("Article deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting article:", error);
+      toast.error("Failed to delete article.");
     } finally {
       setLoadingState(null);
     }
@@ -248,7 +286,7 @@ const Articles = () => {
                   onChange={handleFileChange}
                   className="mb-2"
                   accept="image/*"
-                  required
+                  required={!selectedArticle} // Only required for new articles
                 />
                 {filePreview && (
                   <img
@@ -318,22 +356,42 @@ const Articles = () => {
                   articles.map((article) => (
                     <div
                       key={article.id}
-                      className="cursor-pointer"
-                      onClick={() => handleArticleClick(article)}
+                      className="relative"
                     >
-                      <img
-                        src={article.attributes.feauture_image}
-                        className="h-40 w-40 rounded border border-stroke object-cover dark:border-strokedark"
-                      />
-                      <h3 className="text-lg font-medium dark:text-white">
-                        {article.attributes.title}
-                      </h3>
-                      <p className="dark:text-white">
-                        {article.attributes.description}
-                      </p>
-                      <p className="text-sm font-bold dark:text-white">
-                        Category: {article.attributes.category}
-                      </p>
+                      <div className="absolute right-2 top-2 z-10 flex gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleArticleClick(article);
+                          }}
+                          className="rounded-full bg-white p-2 shadow-md hover:bg-gray-100"
+                          title="Edit article"
+                        >
+                          <FaPencilAlt className="text-primary" />
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteArticle(article.id, e)}
+                          className="rounded-full bg-white p-2 shadow-md hover:bg-gray-100"
+                          title="Delete article"
+                        >
+                          <FaTrash className="text-red" />
+                        </button>
+                      </div>
+                      <div className="cursor-pointer">
+                        <img
+                          src={article.attributes.feauture_image}
+                          className="h-40 w-40 rounded border border-stroke object-cover dark:border-strokedark"
+                        />
+                        <h3 className="text-lg font-medium dark:text-white">
+                          {article.attributes.title}
+                        </h3>
+                        <p className="dark:text-white">
+                          {article.attributes.description}
+                        </p>
+                        <p className="text-sm font-bold dark:text-white">
+                          Category: {article.attributes.category}
+                        </p>
+                      </div>
                     </div>
                   ))
                 )}
