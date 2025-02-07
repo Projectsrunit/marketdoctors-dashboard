@@ -136,7 +136,7 @@ const DoctorTable = () => {
           >
             <div className="flex items-center gap-3 p-2.5 xl:p-5">
               <div className="flex-shrink-0">
-                <Image
+                <img
                   src={doctorItem.profile_picture}
                   alt="Doctor"
                   width={48}
